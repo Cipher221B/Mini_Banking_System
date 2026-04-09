@@ -13,7 +13,6 @@ class User_Repository
 {
     private: 
         SQLHDBC hdbc;
-        Error_Info last_err;
 
     public:
         enum class Repository_Result
@@ -26,11 +25,6 @@ class User_Repository
         };
         
         User_Repository(SQLHDBC conn);
-        //api handle error
-        void handle_error_register(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free);
-        void handle_error_register(SQLSMALLINT type, SQLHANDLE handle);
-        void handle_error_login(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free);
-        void handle_error_login(SQLSMALLINT type, SQLHANDLE handle);
         
         //api login
         Repository_Result get_user_information(User& u, Session& s, string& phone_number);

@@ -1,32 +1,47 @@
 #include "manager_account.h"
 #include "random_generation.h"
 #include <stdexcept>
+#include "system_errors.h"
 
-void Account::create_account()
+//setter
+void Account::set_account_id(int i)
 {
-    int choose;
-    cout << "Type Account?\n";
-    cout << "1. Current Account!\n";
-    cout << "2. Saving Account\n";
-    cout << "3. Credit Account?\n";
-    cout << "4. Business Account?\n";
-    cout << "Enter (1-4): ";
-    cin >> choose;
-    cin.ignore();
-    
-    if(set_type_account(choose) == false)
-    {
-        cout << "Error! Try Again!!!\n";
-        create_account();
-    }
+    account_id = i;
+}
 
-    status = "ACTIVE";
+void Account::set_account_no(const string& n)
+{
+    account_no = n;
+}
+
+void Account::set_user_id(int i)
+{
+    user_id = i;
+}
+
+void Account::set_balance(double b)
+{
+    if(b>=0)
+    {
+        balance = b;
+    }
+    throw Invalid_Input("Invalid Balance", __FILE__);
 
 }
 
-bool Account::set_type_account(int choose)
+void Account::set_type(const string& t)
 {
-    switch(choose)
+    type = t;
+}
+
+void Account::set_status(const string& s)
+{
+    status = s;
+}
+
+void Account::make_type(int c)
+{
+    switch(c)
     {
         case 1:
         {
@@ -54,10 +69,9 @@ bool Account::set_type_account(int choose)
         }
         default:
         {
-            return false;
+            throw Invalid_Input("Invalid Input.", __FILE__);
         }
     }
 
-    return true;
-
 }
+

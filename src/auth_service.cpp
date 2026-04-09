@@ -215,55 +215,24 @@ AuthService::LOGIN AuthService::login(User& u, Account& a, Session& s, string& p
     
 }
 
-
-void AuthService::handle_duplicate_phone_no(DataBase& conn, User& u, User_Repository& ur, User_Repository::Repository_Result repr)
+void AuthService::handle_duplicate_account_no(DataBase& conn, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr)
 {
-    cout << "This phone number is already being used by another account. Please use a different phone number!\n";
-    u.add_phone_number();
-    repr = ur.add_new_user(u);
-    check_error(conn, u, ur, repr);
-}
-
-void AuthService::check_error(DataBase& conn, User& u, User_Repository& ur, User_Repository::Repository_Result repr)
-{
-    switch(repr)
-    {
-        case User_Repository::Repository_Result::SUCCESS:
-        {
-            break;
-        }
-        case User_Repository::Repository_Result::DUPLICATE_PHONE_NO:
-        {
-            // có thể gọi audit fail để log
-            handle_duplicate_phone_no(conn, u, ur, repr);
-            // ur.create_password(u);
-            // Audit_Log::user_register(conn.get_hdbc(), u, "USER_CREATED", "SUCCESS");
-            break;
-        }
-    
-    }
-
-}
-
-void AuthService::handle_duplicate_account_no(DataBase& conn, User& u, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr)
-{
-    a.account_no = create_account_no(a, ar);
+    a.set_account_no(create_account_no(a, ar));
     check_error(conn, u, a, ar, ar.add_account(u, a));
 }
 
-void AuthService::check_error(DataBase& conn, User& u, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr)
+void AuthService::check_error(DataBase& conn, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr)
 {
     switch(repr)
     {
         case Account_Repository::Repository_Result::SUCCESS:
         {
-            a.user_id = u.user_id;
             break;
 
         }
         case Account_Repository::Repository_Result::DUPLICATE_ACCOUNT_NO:
         {
-            handle_duplicate_account_no(conn, u, a, ar, repr);
+            handle_duplicate_account_no(conn, a, ar, repr);
             break;
         }
     }
@@ -287,17 +256,20 @@ AuthService::REGISTER AuthService::registry(User& u, Account& a)
 
         try
         {
-            a.account_no = create_account_no(a, ar);
+            a.set_account_no(create_account_no(a, ar));
+            if(ur.add_new_user(u) == User_Repository::Repository_Result::DUPLICATE_PHONE_NO)
+            {
+                DB_Helper::rollback(conn.get_hdbc());
+                return REGISTER::E_DUPLICATE_PHONE_NO;
+            }
 
-            //create user include: User Information, check dup phone, create password, role, permission
-            check_error(conn, u, ur, ur.add_new_user(u));
-            cout << "check_err done\n";
+            // cout << "check_err done\n";
             Audit_Log::user_register(conn.get_hdbc(), u, "USER_CREATED", "SUCCESS");
-
+            a.set_user_id(u.get_user_id());
             // cout << "done create user\n";
 
             //create account
-            check_error(conn, u, a, ar, ar.add_account(u, a)); 
+            check_error(conn, a, ar, ar.add_account(a)); 
             Audit_Log::account_register(conn.get_hdbc(), a, "ACCOUNT_CREATED", "SUCCESS");
 
             // cout << "done create account\n";
@@ -334,6 +306,12 @@ AuthService::REGISTER AuthService::registry(User& u, Account& a)
         {
             System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.state, e.native_err, e.what());
             return REGISTER::SUCCESS;
+        }
+        catch(const Get_Data_Error& e)
+        {
+            DB_Helper::rollback(conn.get_hdbc());
+            System_Log::error_log("Get Data Failed", e.filename_err, e.state, e.native_err, e.what());
+            return REGISTER::FETCH_FAILED;
         }
         
     }

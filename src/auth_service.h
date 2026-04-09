@@ -12,9 +12,9 @@ class AuthService
         enum class REGISTER
         {
             E_DUPLICATE_PHONE_NO,
-            E_DUPLICATE_ACCOUNT_NO,
             CONNECTION_FAILED,
             DATABASE_ERROR,
+            FETCH_FAILED,
             HASH_FAILED,
             CREATE_USER_FAILED,
             CREATE_ACCOUNT_FAILED,
@@ -70,9 +70,6 @@ class AuthService
         REGISTER registry(User& u, Account& a);
 
         //void handle_error(Database& d);
-        void handle_duplicate_account_no(DataBase& conn, User& u, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr);
-        void check_error(DataBase& conn, User& u, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr);
-        void handle_duplicate_phone_no(DataBase& conn, User& u, User_Repository& ur, User_Repository::Repository_Result repr);
-        void check_error(DataBase& conn, User& u, User_Repository& ur, User_Repository::Repository_Result repr);
-
+        void handle_duplicate_account_no(DataBase& conn, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr);
+        void check_error(DataBase& conn, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr);
 };

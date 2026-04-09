@@ -400,6 +400,36 @@ void CLI::create_full_name(User& u)
 
 }
 
+int CLI::input_type_account()
+{
+    clear();
+    cout << "Type Account?\n";
+    cout << "1. Current Account!\n";
+    cout << "2. Saving Account\n";
+    cout << "3. Credit Account?\n";
+    cout << "4. Business Account?\n";
+    cout << "Enter (1-4): ";
+
+    int choose;
+    cin >> choose;
+    cin.ignore();
+    return choose;
+}
+
+void CLI::account_information(Account& a)
+{
+    try
+    {
+        a.make_type(input_type_account());
+        a.set_status("ACTIVE");
+    }
+    catch(const Invalid_Input& e)
+    {
+        cout << e.what() << " Try Again!!!\n";
+        account_information(a);
+    }
+
+}
 
 void CLI::show_register_success_interface(User& u)
 {
@@ -442,7 +472,7 @@ void CLI::show_failed_interface(const string& center_message, const string& mess
 
 CLI::State CLI::handle_register(User& u, Account& a)
 {
-    //input
+    //input user
     show_register_interface();
     create_full_name(u);
     create_phone(u);
@@ -450,12 +480,25 @@ CLI::State CLI::handle_register(User& u, Account& a)
     u.set_status_user("ACTIVE");
     u.set_role_id(2);
 
-    //!!!chỉnh lại class account -> tiến hành refactor Account Class, Edit lại all code theo class.
+    //input account
+    account_information(a);
 
     AuthService as;
-    AuthService::REGISTER r = as.registry(u, a);
+    AuthService::REGISTER r;
+    while(true)
+    {
+        r = as.registry(u, a);
+        if(r == AuthService::REGISTER::E_DUPLICATE_PHONE_NO)
+        {
+            cout << "This phone number is already being used by another account. Please use a different phone number!\n";
+            create_phone(u);
+            continue;
+        }
+        break;
 
-    if(r == AuthService::REGISTER::CREATE_USER_FAILED || r == AuthService::REGISTER::CREATE_ACCOUNT_FAILED || r == AuthService::REGISTER::HASH_FAILED)
+    }
+
+    if(r == AuthService::REGISTER::CREATE_USER_FAILED || r == AuthService::REGISTER::CREATE_ACCOUNT_FAILED || r == AuthService::REGISTER::HASH_FAILED )
     {
         cout << "-------------------------------------\n";
         cout << " Press any key to continue...\n";
@@ -484,13 +527,21 @@ CLI::State CLI::handle_register(User& u, Account& a)
                 show_failed_interface("REGISTER FAILED", "Connection Failed!!! Please Contact with Admin to give a support!");
                 return State::MAIN_MENU;
             }
+            case(AuthService::REGISTER::FETCH_FAILED):
+            {
+                cout << "-------------------------------------\n";
+                cout << " Press any key to continue...\n";
+                cin.ignore(); 
+                show_failed_interface("REGISTER FAILED", "Fetch Data Failed!!! Please Contact with Admin to give a support!");
+                return State::MAIN_MENU;
+            }
 
         }
     }
     cout << "-------------------------------------\n";
     cout << " Press any key to continue...\n";
     cin.ignore(); 
-    show_failed_interface("REGISTER FAILED", "Register Failed, Try Again!!!");
+    show_failed_interface("REGISTER FAILED", "Register Failed!!! Check Your Information and Try Again!");
     return State::MAIN_MENU;
 
 }

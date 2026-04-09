@@ -1,36 +1,10 @@
 #include "account_repository.h"
-#include "database_errors.h"
-#include "odbc_helper_error.h"
 #include "db_helper.h"
 #include "helper_support.h"
 
 Account_Repository::Account_Repository(SQLHDBC conn)
 {
     hdbc = conn;
-
-}
-
-void Account_Repository::handle_error_register(SQLSMALLINT type, SQLHANDLE handle)
-{
-    last_err = Helper_Error::get_infor_error(type, handle);
-    if(last_err.native_err == 2627 || last_err.native_err == 2601) //DUPLICATE ACCOUNT
-    {
-        SQLFreeHandle(type, handle);
-    }
-    else
-    {
-        SQLFreeHandle(type, handle);
-        throw Create_New_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-    }
-    
-}
-
-
-void Account_Repository::handle_error_register(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
-{
-    last_err = Helper_Error::get_infor_error(type_err, handle_err);
-    SQLFreeHandle(type_free, handle_free);
-    throw Create_New_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
 
 }
 
@@ -53,30 +27,31 @@ int Account_Repository::get_sequence_account_no(Account& a)
 
             if(SQL_SUCCEEDED(res))
             {
+                //!!!
                 DB_Helper::bind_col_int(hstmt, 1, sequence);
                 res = SQLFetch(hstmt);
                 
                 if(res != SQL_SUCCESS)
                 {
-                    handle_error_register(SQL_HANDLE_STMT, hstmt);
+                    DB_Helper::handle_error_get_data(SQL_HANDLE_STMT, hstmt);
                 }
 
             }
             else
             {
-                handle_error_register(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_account_register(SQL_HANDLE_STMT, hstmt);
             }
             
         }
         else
         {
-            handle_error_register(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_account_register(SQL_HANDLE_STMT, hstmt);
         }
 
     }
     else
     {
-        handle_error_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_account_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -84,7 +59,7 @@ int Account_Repository::get_sequence_account_no(Account& a)
 }
 
 
-Account_Repository::Repository_Result Account_Repository::add_account(User& u, Account& a)
+Account_Repository::Repository_Result Account_Repository::add_account(Account& a)
 {
     SQLRETURN res;
 
@@ -93,62 +68,55 @@ Account_Repository::Repository_Result Account_Repository::add_account(User& u, A
         
     if(SQL_SUCCEEDED(res))
     {
-        cout << "Alloc (a) success\n";
+        // cout << "Alloc (a) success\n";
         SQLCHAR query[] = "INSERT INTO Account(UserID, Account_NO, Type_Account, Status_Account) OUTPUT INSERTED.AccountID VALUES(?,?,?,?)";
         res = SQLPrepare(hstmt, query, SQL_NTS);
 
         if(SQL_SUCCEEDED(res))
         {
-            cout << "Prepare (a) success\n";
+            // cout << "Prepare (a) success\n";
             SQLLEN account_no_len, type_len, status_len;
 
-            DB_Helper::bind_parameter_int(hstmt, 1, u.user_id);
-            DB_Helper::bind_parameter_string(hstmt, 2, account_no_len, a.account_no);
-            DB_Helper::bind_parameter_string(hstmt, 3, type_len, a.type);
-            DB_Helper::bind_parameter_string(hstmt, 4, status_len, a.status);
+            DB_Helper::bind_parameter_int(hstmt, 1, a.get_user_id());
+            DB_Helper::bind_parameter_string(hstmt, 2, account_no_len, a.get_account_no());
+            DB_Helper::bind_parameter_string(hstmt, 3, type_len, a.get_type());
+            DB_Helper::bind_parameter_string(hstmt, 4, status_len, a.get_status());
         
             res = SQLExecute(hstmt);
 
             if(!SQL_SUCCEEDED(res))
             {
-                handle_error_register(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_account_register(SQL_HANDLE_STMT, hstmt);
                 return Repository_Result::DUPLICATE_ACCOUNT_NO;
             }
             //!!!
-            cout << "execute success\n";
-            DB_Helper::bind_col_int(hstmt, 1, a.account_id);  //declare location get data each column
-            SQLFetch(hstmt); // get data
+            // cout << "execute success\n";
+            int temp_account_id;
+            DB_Helper::bind_col_int(hstmt, 1, temp_account_id);  //declare location get data each column
+            res = SQLFetch(hstmt); //k có account id k ghi được log, k có log = k có action
+
+            if(!SQL_SUCCEEDED(res))
+            {
+                DB_Helper::handle_error_get_data(SQL_HANDLE_STMT, hstmt);
+            }
+            a.set_account_id(temp_account_id);
         }
         else
         {
-            handle_error_register(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_account_register(SQL_HANDLE_STMT, hstmt);
         }
         
     }
     else
     {
-        handle_error_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_account_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
     
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    cout << "fetch (a) success\n";
+    // cout << "fetch (a) success\n";
     return Repository_Result::SUCCESS;
 }
 
-void Account_Repository::handle_error_login(SQLSMALLINT type, SQLHANDLE handle)
-{
-    last_err = Helper_Error::get_infor_error(type, handle);
-    SQLFreeHandle(type, handle);
-    throw Get_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-
-}
-
-void Account_Repository::handle_error_login(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
-{
-    last_err = Helper_Error::get_infor_error(type_err, handle_err);
-    SQLFreeHandle(type_free, handle_free);
-    throw Get_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-}
 
 Account_Repository::Repository_Result Account_Repository::get_information_account(Account& a)
 {
@@ -204,25 +172,25 @@ Account_Repository::Repository_Result Account_Repository::get_information_accoun
                 else
                 {
                     // cout << "On Error Case\n";
-                    handle_error_login(SQL_HANDLE_STMT, hstmt);
+                    DB_Helper::handle_error_account_login(SQL_HANDLE_STMT, hstmt);
                 }
 
             }
             else
             {
-                handle_error_login(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_account_login(SQL_HANDLE_STMT, hstmt);
             }
             
         }
         else
         {
-            handle_error_login(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_account_login(SQL_HANDLE_STMT, hstmt);
         }
 
     }
     else
     {
-        handle_error_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_account_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -230,20 +198,7 @@ Account_Repository::Repository_Result Account_Repository::get_information_accoun
 
 }
 
-void Account_Repository::handle_error_transaction(SQLSMALLINT type, SQLHANDLE handle)
-{
-    last_err = Helper_Error::get_infor_error(type, handle);
-    SQLFreeHandle(type, handle);
-    throw Transaction_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-}
 
-void Account_Repository::handle_error_transaction(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
-{
-    last_err = Helper_Error::get_infor_error(type_err, handle_err);
-    SQLFreeHandle(type_free, handle_free);
-    throw Transaction_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-
-}
 
 
 // void Account_Repository::get_dest_account_information(Transaction_Info& tran_in)
@@ -353,7 +308,7 @@ Account_Repository::Repository_Result Account_Repository::transaction(Account& a
 
             if(!SQL_SUCCEEDED(res))
             {
-                handle_error_register(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_account_register(SQL_HANDLE_STMT, hstmt);
             }
             
             char ret[50];
@@ -365,7 +320,7 @@ Account_Repository::Repository_Result Account_Repository::transaction(Account& a
             //fetch error and system_error case
             if(!SQL_SUCCEEDED(res) || string(ret) == "SYSTEM_ERROR")
             {
-                handle_error_transaction(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_account_transaction(SQL_HANDLE_STMT, hstmt);
             }
             else
             {
@@ -396,13 +351,13 @@ Account_Repository::Repository_Result Account_Repository::transaction(Account& a
         }
         else
         {
-            handle_error_transaction(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_account_transaction(SQL_HANDLE_STMT, hstmt);
         }
         
     }
     else
     {
-        handle_error_transaction(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_account_transaction(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);

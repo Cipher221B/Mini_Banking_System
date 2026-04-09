@@ -4,6 +4,106 @@
 #include "odbc_helper_error.h"
 using namespace std;
 
+//handle error get data 
+void DB_Helper::handle_error_get_data(SQLSMALLINT type, SQLHANDLE handle)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type, handle);
+    SQLFreeHandle(type, handle);
+    throw Get_Data_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+}
+
+//handle error user api
+void DB_Helper::handle_error_user_register(SQLSMALLINT type, SQLHANDLE handle)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type, handle);
+    if(last_err.native_err == 2627 || last_err.native_err == 2601) //DUPLICATE ACCOUNT
+    {
+        SQLFreeHandle(type, handle);
+    }
+    else
+    {
+        SQLFreeHandle(type, handle);
+        throw Create_New_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+    }
+}
+
+void DB_Helper::handle_error_user_register(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type_err, handle_err);
+    SQLFreeHandle(type_free, handle_free);
+    throw Create_New_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+
+}
+
+void DB_Helper::handle_error_user_login(SQLSMALLINT type, SQLHANDLE handle)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type, handle);
+    SQLFreeHandle(type, handle);
+    throw Get_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+
+}
+
+void DB_Helper::handle_error_user_login(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type_err, handle_err);
+    SQLFreeHandle(type_free, handle_free);
+    throw Get_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+
+}
+
+//handle error account api
+void DB_Helper::handle_error_account_register(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type_err, handle_err);
+    SQLFreeHandle(type_free, handle_free);
+    throw Create_New_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+
+}
+
+void DB_Helper::handle_error_account_register(SQLSMALLINT type, SQLHANDLE handle)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type, handle);
+    if(last_err.native_err == 2627 || last_err.native_err == 2601) //DUPLICATE ACCOUNT
+    {
+        SQLFreeHandle(type, handle);
+    }
+    else
+    {
+        SQLFreeHandle(type, handle);
+        throw Create_New_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+    }
+}
+
+void DB_Helper::handle_error_account_login(SQLSMALLINT type, SQLHANDLE handle)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type, handle);
+    SQLFreeHandle(type, handle);
+    throw Get_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+
+}
+
+void DB_Helper::handle_error_account_login(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type_err, handle_err);
+    SQLFreeHandle(type_free, handle_free);
+    throw Get_Account_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+}
+
+void DB_Helper::handle_error_account_transaction(SQLSMALLINT type, SQLHANDLE handle)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type, handle);
+    SQLFreeHandle(type, handle);
+    throw Transaction_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+}
+
+void DB_Helper::handle_error_account_transaction(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type_err, handle_err);
+    SQLFreeHandle(type_free, handle_free);
+    throw Transaction_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+
+}
+
 //wrapper
 void DB_Helper::bind_parameter_int(SQLHSTMT hstmt, int col, int& value)
 {

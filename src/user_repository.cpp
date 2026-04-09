@@ -9,27 +9,6 @@ User_Repository::User_Repository(SQLHDBC conn)
     hdbc = conn; 
 }
 
-void User_Repository::handle_error_register(SQLSMALLINT type, SQLHANDLE handle)
-{
-    last_err = Helper_Error::get_infor_error(type, handle);
-    if(last_err.native_err == 2627 || last_err.native_err == 2601) //DUPLICATE ACCOUNT
-    {
-        SQLFreeHandle(type, handle);
-    }
-    else
-    {
-        SQLFreeHandle(type, handle);
-        throw Create_New_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-    }
-}
-
-void User_Repository::handle_error_register(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
-{
-    last_err = Helper_Error::get_infor_error(type_err, handle_err);
-    SQLFreeHandle(type_free, handle_free);
-    throw Create_New_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-
-}
 
 // //User Role
 void User_Repository::set_role(User& u)
@@ -53,18 +32,18 @@ void User_Repository::set_role(User& u)
             
             if(!SQL_SUCCEEDED(res))
             {
-                handle_error_register(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_user_register(SQL_HANDLE_STMT, hstmt);
             }
 
         }
         else
         {
-            handle_error_register(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_user_register(SQL_HANDLE_STMT, hstmt);
         }
     }
     else
     {
-        handle_error_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_user_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -88,44 +67,51 @@ User_Repository::Repository_Result User_Repository::add_new_user(User& u) // err
         {
             cout << "Prepare success\n";
 
-            SQLLEN full_name_len, phone_number_len, status_len;
-            SQLLEN credential_len, salt_len;
+            SQLLEN full_name_len, phone_number_len, status_len, credential_len, salt_len;
 
-            DB_Helper::bind_parameter_string(hstmt, 1, full_name_len , u.full_name);
-            DB_Helper::bind_parameter_string(hstmt, 2, phone_number_len, u.phone_number);
-            DB_Helper::bind_parameter_string(hstmt, 3, status_len, u.status_user);
-            DB_Helper::bind_parameter_vector(hstmt, 4, credential_len, u.credential);
-            DB_Helper::bind_parameter_vector(hstmt, 5, salt_len, u.salt);
-            DB_Helper::bind_parameter_int(hstmt, 6, u.role_id);
+            DB_Helper::bind_parameter_string(hstmt, 1, full_name_len , u.get_full_name());
+            DB_Helper::bind_parameter_string(hstmt, 2, phone_number_len, u.get_phone_number());
+            DB_Helper::bind_parameter_string(hstmt, 3, status_len, u.get_status_user());
+            DB_Helper::bind_parameter_vector(hstmt, 4, credential_len, u.get_credential());
+            DB_Helper::bind_parameter_vector(hstmt, 5, salt_len, u.get_salt());
+            DB_Helper::bind_parameter_int(hstmt, 6, u.get_role_id());
             //run statement has been prepare
             res = SQLExecute(hstmt);
 
             if(!SQL_SUCCEEDED(res))
             {
-                handle_error_register(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_eerror_user_register(SQL_HANDLE_STMT, hstmt);
                 return User_Repository::Repository_Result::DUPLICATE_PHONE_NO;
                 
             }
-            cout << "Execute success\n";
-            //!!!
-            DB_Helper::bind_col_int(hstmt, 1, u.user_id);
-            SQLFetch(hstmt);
-            cout << "UserID: " << u.user_id << endl;
+            // cout << "Execute success\n";
+            
+            //fetch data
+            int temp_user_id;
+            DB_Helper::bind_col_int(hstmt, 1, temp_user_id);
+            res = SQLFetch(hstmt);
+            if(!SQL_SUCCEEDED(res))
+            {
+                DB_Helper::handle_error_get_data(SQL_HANDLE_STMT, hstmt);
+            }
+            u.set_user_id(temp_user_id);
+            
+            // cout << "UserID: " << u.user_id << endl;
         }
         else
         {
-            handle_error_register(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_user_register(SQL_HANDLE_STMT, hstmt);
 
         }
     }
     else
     {
-        handle_error_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_user_register(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
 
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
-    cout << "create_user_success\n";
+    // cout << "create_user_success\n";
     return User_Repository::Repository_Result::SUCCESS;
 
 }
@@ -170,23 +156,6 @@ User_Repository::Repository_Result User_Repository::add_new_user(User& u) // err
 // }
 
 
-
-void User_Repository::handle_error_login(SQLSMALLINT type, SQLHANDLE handle)
-{
-    last_err = Helper_Error::get_infor_error(type, handle);
-    SQLFreeHandle(type, handle);
-    throw Get_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-
-}
-
-void User_Repository::handle_error_login(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
-{
-    last_err = Helper_Error::get_infor_error(type_err, handle_err);
-    SQLFreeHandle(type_free, handle_free);
-    throw Get_User_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
-
-}
-
 void User_Repository::get_user_role(User& u)
 {
     SQLRETURN res;
@@ -213,25 +182,25 @@ void User_Repository::get_user_role(User& u)
 
                 if(!SQL_SUCCEEDED(res))
                 {
-                    handle_error_login(SQL_HANDLE_STMT, hstmt);
+                    DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
                 }
 
             }
             else
             {
-                handle_error_login(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
             }
             
         }
         else
         {
-            handle_error_login(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
         }
 
     }
     else
     {
-        handle_error_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_user_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -264,26 +233,26 @@ void User_Repository::get_session_version(User& u, Session& s)
 
                 if(!SQL_SUCCEEDED(res))
                 {
-                    handle_error_login(SQL_HANDLE_STMT, hstmt); //throw sai logic
+                    DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt); //throw sai logic
 
                 }
 
             }
             else
             {
-                handle_error_login(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
             }
             
         }
         else
         {
-            handle_error_login(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
         }
 
     }
     else
     {
-        handle_error_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_user_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
@@ -345,26 +314,26 @@ User_Repository::Repository_Result User_Repository::get_user_information(User& u
                 }
                 else
                 {
-                    handle_error_login(SQL_HANDLE_STMT, hstmt); //throw sai logic
+                    DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt); //throw sai logic
 
                 }
 
             }
             else
             {
-                handle_error_login(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
             }
             
         }
         else
         {
-            handle_error_login(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
         }
 
     }
     else
     {
-        handle_error_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_user_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
