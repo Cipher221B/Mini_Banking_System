@@ -81,6 +81,12 @@ class CLI
         // register interface api
         void show_register_success_interface(User& u);
         void show_register_interface();
+        string input_phone();
+        string input_password();
+        string input_full_name();
+        void create_full_name(User& u);
+        void create_phone(User& u);
+        void create_password(User& u);
         State handle_register(User& u, Account& a);
 
         //login interface api

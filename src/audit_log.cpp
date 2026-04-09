@@ -145,7 +145,6 @@ void Audit_Log::user_register(SQLHDBC hdbc, User& u, const string& message, cons
     SQLHSTMT hstmt = SQL_NULL_HSTMT;
     res = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
 
-    cout << 
     if(SQL_SUCCEEDED(res))
     {
         SQLCHAR query[] = "INSERT INTO Auth_Logs(Action_Log, Status_Log, Detail, UserID) VALUES(?,?,?,?)"; //IP address có thể dùng C++ để query lên Server

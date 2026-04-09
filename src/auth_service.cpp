@@ -6,6 +6,7 @@
 #include "hash.h"
 #include "random_generation.h"
 #include "database_errors.h"
+#include "system_errors.h"
 #include "audit_log.h"
 #include "account_service.h"
 #include "validation_helper.h"
@@ -286,9 +287,6 @@ AuthService::REGISTER AuthService::registry(User& u, Account& a)
 
         try
         {
-            // Input
-            u.create_user();
-            a.create_account();
             a.account_no = create_account_no(a, ar);
 
             //create user include: User Information, check dup phone, create password, role, permission

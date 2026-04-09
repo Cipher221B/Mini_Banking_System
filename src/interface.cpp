@@ -7,6 +7,7 @@
 #include "validation_helper.h"
 #include "transaction_information.h"
 #include "account_service.h"
+#include "system_errors.h"
 
 //custom interface
 void CLI::show_custom_dashboard(User& u, Account& a) 
@@ -332,6 +333,74 @@ void CLI::show_register_interface()
 
 }
 
+string CLI::input_phone()
+{
+    string pn;
+    cout << "Phone Number('Include 10 digit and start with 0'): ";
+    getline(cin, pn);
+    return pn;
+}
+
+string CLI::input_password()
+{
+    string p;
+    cout << "Password('At Least 8 character'): ";
+    getline(cin, p);
+    return p;
+
+}
+
+string CLI::input_full_name()
+{
+    string f;
+    cout << "Full Name: ";
+    getline(cin, f);
+    return f;
+    
+}
+
+void CLI::create_password(User& u)
+{
+    try
+    {
+        u.set_credential(input_password());
+    }
+    catch(const Invalid_Input& e)
+    {
+        cout << e.what() << " Try Againt!!!" << endl;
+        create_password(u);
+    }
+
+}
+
+void CLI::create_phone(User& u)
+{
+    try
+    {
+        u.set_phone_number(input_phone());
+    }
+    catch(const Invalid_Input& e)
+    {
+        cout << e.what() << " Try Againt!!!" << endl;
+        create_phone(u);
+    }
+}
+
+void CLI::create_full_name(User& u)
+{
+    try
+    {
+        u.set_full_name(input_full_name());
+    }
+    catch(const Invalid_Input& e)
+    {
+        cout << e.what() << " Try Againt!!!" << endl;
+        create_full_name(u);
+    }
+
+}
+
+
 void CLI::show_register_success_interface(User& u)
 {
     clear();
@@ -373,7 +442,15 @@ void CLI::show_failed_interface(const string& center_message, const string& mess
 
 CLI::State CLI::handle_register(User& u, Account& a)
 {
+    //input
     show_register_interface();
+    create_full_name(u);
+    create_phone(u);
+    create_password(u);
+    u.set_status_user("ACTIVE");
+    u.set_role_id(2);
+
+    //!!!chỉnh lại class account -> tiến hành refactor Account Class, Edit lại all code theo class.
 
     AuthService as;
     AuthService::REGISTER r = as.registry(u, a);

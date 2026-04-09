@@ -1,100 +1,74 @@
 #include "manager_user.h"
 #include "hash.h"
+#include "system_errors.h"
 
-string User::input_phone()
-{
-    string pn;
-    cout << "Phone Number('Include 10 digit and start with 0'): ";
-    getline(cin, pn);
-    return pn;
-}
-
-string User::input_password()
-{
-    string p;
-    cout << "Password('At Least 8 character'): ";
-    getline(cin, p);
-    return p;
-
-}
-
-bool User::check_valid_phone(string& pn)
+//setter
+void User::set_phone_number(const string& pn)
 {
     if(pn.size() == 10 && pn[0] == '0')
     {
-        return true;
+        phone_number = pn;
     }
-    else
-    {
-        cout << "Error Phone Number!!! Try Again!\n";
-        return false;
-    }
+    throw Invalid_Input("Phone Number is Invalid.", __FILE__);
 
 }
 
-bool User::check_valid_password(string& p)
+void User::set_credential(const string& password)
 {
-    if(p.size() >= 8 && p.size() <= 64)
+    if(password.size() >= 8 && password.size() <= 64)
     {
-        return true;
+        creat_salt();
+        credential = Hash::encryption(password, salt); 
     }
-    else
+    throw Invalid_Input("Password is Invalid (Password length >= 8).", __FILE__);
+}
+
+void User::set_credential(vector<unsigned char>& password_hash)
+{
+    if(password_hash == 32)
     {
-        cout << "Error Password!!! Try Again!\n";
-        return false;
+        credential = password_hash;
     }
+    throw Invalid_Input("Credential is Invalid.", __FILE__); //ghi system log
 }
 
-void User::set_phone_number(string& pn)
+void User::set_salt(vector<unsigned char>& s)
 {
-    phone_number = pn;
+    if(s.size() == 16)
+    {
+        salt = s;
+    }
+    throw Invalid_Input("Salt is Invalid.", __FILE__); //ghi system log
 
 }
 
-void User::set_credential(string& password)
+void User::set_full_name(const string& f)
 {
-    credential = Hash::encryption(password, salt); // throw runtime error
+    if(f.size() < 2)
+    {
+        throw Invalid_Input("Full Name is Invalid.", __FILE__);
+    }
+    full_name = f;
+    
 }
 
-void User::set_salt()
+void User::set_role_id(int r)
+{
+    role_id = r;
+}
+
+void User::set_status_user(const string& s)
+{
+    status_user = s;
+}
+
+void User::set_user_id(int i)
+{
+    id = i;
+}
+
+void User::creat_salt()
 {
     salt = Hash::generate_salt();
-}
-
-void User::add_phone_number()
-{
-    string raw_phone;
-    do
-    {
-        raw_phone = input_phone();
-
-    } while(!check_valid_phone(raw_phone));
-    set_phone_number(raw_phone);
-
-}
-
-void User::add_password()
-{
-    string raw_password;
-    do
-    {
-        raw_password = input_password();
-
-    }while(!check_valid_password(raw_password));
-    set_salt();
-    set_credential(raw_password);
-}
-
-void User::create_user()
-{
- 
-    cout << "Full Name: ";
-    getline(cin, full_name);
-
-    add_phone_number();
-    add_password();
-    status_user = "ACTIVE";
-    role_id = 2;
-    
 }
 

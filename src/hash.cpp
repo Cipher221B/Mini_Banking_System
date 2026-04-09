@@ -2,7 +2,7 @@
 #include <openssl/rand.h>
 #include <stdexcept>
 #include "hash.h"
-#include "database_errors.h"
+#include "system_errors.h"
 
 vector<unsigned char> Hash::encryption(string& password, vector<unsigned char>& salt, int iteration, int key_len)
 {
