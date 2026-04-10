@@ -57,6 +57,7 @@ class CLI
         void check_account_no(string& dest_account);
         void check_account_balance(Account& a, int& amount);
         bool check_password(User& u, string& password);
+
         State_Custom_DashBoard custom_activity(User& u, Account& a);
         State main_control_custom_dash_board(User& u, Account& a, Session& s);
         

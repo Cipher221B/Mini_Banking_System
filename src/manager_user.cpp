@@ -72,3 +72,24 @@ void User::creat_salt()
     salt = Hash::generate_salt();
 }
 
+void User::clear_sensitive_data()
+{
+    fill(credential.begin(), credential.end(), 0);
+    credential.clear();
+
+    fill(salt.begin(), salt.end(), 0);
+    salt.clear();
+
+    status_user;
+
+    role_id = 0;
+}
+
+void User::clear_all_user_data()
+{
+    user_id = 0;
+    full_name.clear();
+    phone_number.clear();
+
+    clear_dynamic_data();
+}

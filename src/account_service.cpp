@@ -3,8 +3,46 @@
 #include "user_repository.h"
 #include "account_repository.h"
 #include "database_errors.h"
+#include "db_helper.h"
 #include "audit_log.h"
+#include "validation_helper.h"
 using namespace std;
+
+AccountService::LOAD_DATA AccountService::refresh(User& u, Account& a, Session& s)
+{
+    try
+    {
+        DataBase conn;
+        conn.set_off_auto_commit();
+        User_Repository ur(conn.get_hdbc());
+        Account_Repository ar(conn.get_hdbc());
+        DB_Helper::begin_transaction(conn.get_hdbc());
+        
+        try
+        {
+            //get session
+            if(Validate::check_session(s, ur.get_version_db(s)))
+            {
+                DB_Helper::rollback(conn.get_hdbc());
+                return LOAD_DATA::SESSION_EXPIRED;
+            }
+            //check session
+            //if true: get full data
+            DB_Helper::commit(conn.get_hdbc());
+
+        }
+    
+
+
+    }
+    catch(const ConnectionErrors& e)
+    {
+        // cout << "Connection_Error\n";
+        System_Log::error_log("DataBase Connection Failed", e.filename_err, e.state, e.native_err, e.what());
+        return LOAD_DATA::CONNECTION_FAILED;
+    }
+    
+}
 
 AccountService::TRANSFER AccountService::create_transaction(User& u, Account& a, string& dest_account, int amount)
 {

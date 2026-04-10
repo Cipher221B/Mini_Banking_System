@@ -12,6 +12,14 @@ void DB_Helper::handle_error_get_data(SQLSMALLINT type, SQLHANDLE handle)
     throw Get_Data_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
 }
 
+void DB_Helper::handle_error_get_data(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free)
+{
+    Error_Info last_err = Helper_Error::get_infor_error(type_err, handle_err);
+    SQLFreeHandle(type_free, handle_free);
+    throw Get_Data_Error(last_err.message_err, __FILE__, last_err.sql_state, last_err.native_err);
+}
+
+
 //handle error user api
 void DB_Helper::handle_error_user_register(SQLSMALLINT type, SQLHANDLE handle)
 {

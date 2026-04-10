@@ -84,3 +84,13 @@ string Validate::check_role(User& u, Account& a)
     return "CUSTOM";
 
 }
+
+bool Validate::check_ssession(Session& s, int current_session_on_db)
+{
+    if(s.get_session_version() != current_session_on_db)
+    {
+        return false;
+    }
+    return true;
+
+}

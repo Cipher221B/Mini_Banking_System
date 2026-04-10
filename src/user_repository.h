@@ -26,10 +26,14 @@ class User_Repository
         
         User_Repository(SQLHDBC conn);
         
+        //api refresh
+        Repository_Result get_user_data(User& u, Session& s);
+
         //api login
         Repository_Result get_user_information(User& u, Session& s, string& phone_number);
+        Repository_Result get_user_data_to_authentication(User& u, string& phone_number);
         void get_user_role(User& u);
-        void get_session_version(User& u, Session& s);
+        void get_version_db(Session& s);
         void get_salt();
 
         //api registry

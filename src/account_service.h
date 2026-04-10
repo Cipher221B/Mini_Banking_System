@@ -14,6 +14,15 @@ class AccountService
             INSUFFICIENT_BALANCE,
             FAILED
         };
+
+        enum class LOAD_DATA
+        {
+            SUCCESSS, 
+            SESSION_EXPIRED,
+            CONNECTION_FAILED
+        };
+
         TRANSFER create_transaction(User& u, Account& a, string& dest_account, int amount);
+        LOAD_DATA refresh(User& u, Account& a);
 
 };

@@ -207,11 +207,12 @@ void User_Repository::get_user_role(User& u)
 
 }
 
-void User_Repository::get_session_version(User& u, Session& s)
+int User_Repository::get_version_db(Session& s)
 {
     SQLRETURN res;
     SQLHSTMT hstmt = SQL_NULL_HSTMT;
     res = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+    int temp_version;
 
     if(SQL_SUCCEEDED(res))
     {
@@ -222,40 +223,40 @@ void User_Repository::get_session_version(User& u, Session& s)
         if(SQL_SUCCEEDED(res))
         {
             // cout << "Prepare success\n";
-            SQLLEN phone_number_len;
-            DB_Helper::bind_parameter_int(hstmt, 1, u.user_id);
+            DB_Helper::bind_parameter_int(hstmt, 1, s.get_user_id());
             res = SQLExecute(hstmt);
 
             if(SQL_SUCCEEDED(res))
             {
-                DB_Helper::bind_col_int(hstmt, 1, s.session_version);
+                DB_Helper::bind_col_int(hstmt, 1, temp_session);
                 res = SQLFetch(hstmt);
 
                 if(!SQL_SUCCEEDED(res))
                 {
-                    DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt); //throw sai logic
+                    DB_Helper::handle_error_get_data(SQL_HANDLE_STMT, hstmt); //throw sai logic
 
                 }
 
             }
             else
             {
-                DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
+                DB_Helper::handle_error_get_data(SQL_HANDLE_STMT, hstmt);
             }
             
         }
         else
         {
-            DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
+            DB_Helper::handle_error_get_data(SQL_HANDLE_STMT, hstmt);
         }
 
     }
     else
     {
-        DB_Helper::handle_error_user_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+        DB_Helper::handle_error_get_data(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
     }
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+    return temp_version;
 }
 
 User_Repository::Repository_Result User_Repository::get_user_information(User& u, Session& s, string& phone_number)
@@ -338,5 +339,116 @@ User_Repository::Repository_Result User_Repository::get_user_information(User& u
 
     SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
     return User_Repository::Repository_Result::SUCCESS;
+
+}
+
+User_Repository::Repository_Result User_Repository::get_user_data(User& u, Session& s)
+{
+    SQLRETURN res;
+    SQLHSTMT hstmt = SQL_NULL_HSTMT;
+    res = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+
+    if(SQL_SUCCEEDED(res))
+    {
+        // cout << "Alloc success\n";
+        SQLCHAR query[] = "SELECT u.UserID, u.Full_Name, u.Session_Version FROM Users u WHERE u.Phone_Number = ?";
+        res = SQLPrepare(hstmt, query, SQL_NTS);
+
+        if(SQL_SUCCEEDED(res))
+        {
+            // cout << "Prepare success\n";
+            SQLLEN phone_number_len;
+            DB_Helper::bind_parameter_int(hstmt, 1, u.user_id);
+            res = SQLExecute(hstmt);
+
+            if(SQL_SUCCEEDED(res))
+            {
+                DB_Helper::bind_col_int(hstmt, 1, s.session_version);
+                res = SQLFetch(hstmt);
+
+                if(!SQL_SUCCEEDED(res))
+                {
+                    DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt); //throw sai logic
+
+                }
+
+            }
+            else
+            {
+                DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
+            }
+            
+        }
+        else
+        {
+            DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
+        }
+
+    }
+    else
+    {
+        DB_Helper::handle_error_user_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+}
+
+User_Repository::Repository_Result User_Repository::get_user_data_to_authentication(User& u, string& phone_number)
+{
+    SQLRETURN res;
+    SQLHSTMT hstmt = SQL_NULL_HSTMT;
+    res = SQLAllocHandle(SQL_HANDLE_STMT, hdbc, &hstmt);
+
+    if(SQL_SUCCEEDED(res))
+    {
+        // cout << "Alloc success\n";
+        SQLCHAR query[] = "SELECT u.UserID, u.Status_User, u.Session_Version FROM Users u WHERE u.Phone_Number = ?";
+        res = SQLPrepare(hstmt, query, SQL_NTS);
+
+        if(SQL_SUCCEEDED(res))
+        {
+            // cout << "Prepare success\n";
+            SQLLEN phone_number_len;
+            DB_Helper::bind_parameter_string(hstmt, 1, phone_number_len, phone_number);
+            res = SQLExecute(hstmt);
+
+            if(SQL_SUCCEEDED(res))
+            {
+                int user_id, session_version;
+                char status_user[15];
+
+                DB_Helper::bind_col_int(hstmt, 1, user_id);
+                DB_Helper::bind_col_string(hstmt, 2, status_user, sizeof(status_user), status_user);
+                DB_Helper::bind_col_int(hstmt, 3, session_version);
+                res = SQLFetch(hstmt);
+
+                if(!SQL_SUCCEEDED(res))
+                {
+                    DB_Helper::handle_error_get_data(SQL_HANDLE_STMT, hstmt); //throw sai logic
+
+                }
+                u.set_user_id(user_id);
+                //dùng 1 query duy nhất 
+
+            }
+            else
+            {
+                DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
+            }
+            
+        }
+        else
+        {
+            DB_Helper::handle_error_user_login(SQL_HANDLE_STMT, hstmt);
+        }
+
+    }
+    else
+    {
+        DB_Helper::handle_error_user_login(SQL_HANDLE_DBC, hdbc, SQL_HANDLE_STMT, hstmt);
+    }
+
+    SQLFreeHandle(SQL_HANDLE_STMT, hstmt);
+
 
 }

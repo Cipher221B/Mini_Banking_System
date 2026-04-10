@@ -12,6 +12,7 @@ class DB_Helper
 
         //handle err get data api
         static void handle_error_get_data(SQLSMALLINT type, SQLHANDLE handle);
+        static void handle_error_get_data(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free);
 
         //handle err user api
         static void handle_error_user_register(SQLSMALLINT type, SQLHANDLE handle);

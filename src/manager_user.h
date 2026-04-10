@@ -20,6 +20,10 @@ class User
         //Constructor
         User() : credential(32), salt(16){};
         
+        //clear data
+        void clear_sensitive_data();
+        void clear_all_user_data();
+        
         //setter api
         void creat_salt();
         void set_salt(vector<unsigned char>& password_hash);

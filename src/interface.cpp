@@ -179,36 +179,40 @@ CLI::State_Admin_DashBoard CLI::admin_activity()
 
 CLI::State CLI::main_control_admin_dash_board(User& u, Account& a, Session& s)
 {
-    CLI::State_Admin_DashBoard sa = CLI::State_Admin_DashBoard::ADMIN_MENU;
-
-    while(sa != CLI::State_Admin_DashBoard::LOG_OUT)
+    if(refresh_data(u, a) == AccountService::LOAD_DATA::SUCCESSS)
     {
-        switch(sa)
+        CLI::State_Admin_DashBoard sa = CLI::State_Admin_DashBoard::ADMIN_MENU;
+
+        while(sa != CLI::State_Admin_DashBoard::LOG_OUT)
         {
-            case (CLI::State_Admin_DashBoard::ADMIN_MENU):
+            switch(sa)
             {
-                sa = admin_activity();
-                break;
-            }
-            case (CLI::State_Admin_DashBoard::VIEW_USER):
-            {
-                //view_user
-                break;
+                case (CLI::State_Admin_DashBoard::ADMIN_MENU):
+                {
+                    sa = admin_activity();
+                    break;
+                }
+                case (CLI::State_Admin_DashBoard::VIEW_USER):
+                {
+                    //view_user
+                    break;
 
+                }
+                case (CLI::State_Admin_DashBoard::SET_PERMISSION_USER):
+                {
+                    //block-unblock
+                    break;
+                }
+                case (CLI::State_Admin_DashBoard::DELETE_ACCOUNT_CUSTOM):
+                {
+                    //delete account
+                    break;
+                }
             }
-            case (CLI::State_Admin_DashBoard::SET_PERMISSION_USER):
-            {
-                //block-unblock
-                break;
-            }
-            case (CLI::State_Admin_DashBoard::DELETE_ACCOUNT_CUSTOM):
-            {
-                //delete account
-                break;
-            }
+
         }
-
     }
+
     return CLI::State::MAIN_MENU;
 
 }
