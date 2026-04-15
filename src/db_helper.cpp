@@ -113,12 +113,12 @@ void DB_Helper::handle_error_account_transaction(SQLSMALLINT type_err, SQLHANDLE
 }
 
 //wrapper
-void DB_Helper::bind_parameter_int(SQLHSTMT hstmt, int col, int& value)
+void DB_Helper::bind_parameter_int(SQLHSTMT hstmt, int col, const int& value)
 {
     SQLBindParameter(hstmt, col, SQL_PARAM_INPUT, SQL_C_LONG, SQL_INTEGER, 0, 0, &value, 0, NULL);
 }
 
-void DB_Helper::bind_parameter_bool(SQLHSTMT hstmt, int col, bool& value)
+void DB_Helper::bind_parameter_bool(SQLHSTMT hstmt, int col, const bool& value)
 {
     SQLBindParameter(hstmt, col, SQL_PARAM_INPUT, SQL_C_BIT, SQL_BIT, 0, 0, &value, 0, NULL);
 }
@@ -129,7 +129,7 @@ void DB_Helper::bind_parameter_string(SQLHSTMT hstmt, int col, SQLLEN& value_len
     SQLBindParameter(hstmt, col, SQL_PARAM_INPUT, SQL_C_CHAR, SQL_VARCHAR, value_len, 0, (SQLPOINTER)value.c_str(), value_len, &value_len);
 }
 
-void DB_Helper::bind_parameter_vector(SQLHSTMT hstmt, int col, SQLLEN& value_len, vector<unsigned char>& value)
+void DB_Helper::bind_parameter_vector(SQLHSTMT hstmt, int col, SQLLEN& value_len, const vector<unsigned char>& value)
 {
     value_len = value.size();
     SQLBindParameter(hstmt, col, SQL_PARAM_INPUT, SQL_C_BINARY, SQL_VARBINARY, value_len, 0, value.data(), value_len, &value_len);

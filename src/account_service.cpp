@@ -13,22 +13,15 @@ AccountService::LOAD_DATA AccountService::refresh(User& u, Account& a, Session& 
     try
     {
         DataBase conn;
-        conn.set_off_auto_commit();
         User_Repository ur(conn.get_hdbc());
         Account_Repository ar(conn.get_hdbc());
         DB_Helper::begin_transaction(conn.get_hdbc());
         
         try
         {
-            //get session
-            if(Validate::check_session(s, ur.get_version_db(s)))
-            {
-                DB_Helper::rollback(conn.get_hdbc());
-                return LOAD_DATA::SESSION_EXPIRED;
-            }
-            //check session
-            //if true: get full data
-            DB_Helper::commit(conn.get_hdbc());
+            //get những thứ k ảnh hưởng đến system nhưng quan trọng
+            s.set_session_version
+            a.set_balance(ar.get_balance(a));
 
         }
     

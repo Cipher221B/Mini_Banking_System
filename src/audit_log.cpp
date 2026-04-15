@@ -159,7 +159,7 @@ void Audit_Log::user_register(SQLHDBC hdbc, User& u, const string& message, cons
             DB_Helper::bind_parameter_string(hstmt, 1, Actionlen, action);
             DB_Helper::bind_parameter_string(hstmt, 2, Statuslen, status);
             DB_Helper::bind_parameter_string(hstmt, 3, Messagelen, message);
-            DB_Helper::bind_parameter_int(hstmt, 4, u.user_id);
+            DB_Helper::bind_parameter_int(hstmt, 4, u.get_user_id());
 
             res = SQLExecute(hstmt);
 
@@ -206,8 +206,8 @@ void Audit_Log::account_register(SQLHDBC hdbc, Account& a, const string& message
             DB_Helper::bind_parameter_string(hstmt, 1, Actionlen, action);
             DB_Helper::bind_parameter_string(hstmt, 2, Statuslen, status);
             DB_Helper::bind_parameter_string(hstmt, 3, Messagelen, message);
-            DB_Helper::bind_parameter_int(hstmt, 4, a.user_id);
-            DB_Helper::bind_parameter_int(hstmt, 5, a.account_id);
+            DB_Helper::bind_parameter_int(hstmt, 4, a.get_user_id());
+            DB_Helper::bind_parameter_int(hstmt, 5, a.get_account_id());
             res = SQLExecute(hstmt);
 
             if(!SQL_SUCCEEDED(res))
@@ -253,8 +253,8 @@ void Audit_Log::login(SQLHDBC hdbc, Account& a, const string& message, const str
             DB_Helper::bind_parameter_string(hstmt, 1, Actionlen, action);
             DB_Helper::bind_parameter_string(hstmt, 2, Statuslen, status);
             DB_Helper::bind_parameter_string(hstmt, 3, Messagelen, message);
-            DB_Helper::bind_parameter_int(hstmt, 4, a.user_id);
-            DB_Helper::bind_parameter_int(hstmt, 5, a.account_id);
+            DB_Helper::bind_parameter_int(hstmt, 4, a.get_user_id());
+            DB_Helper::bind_parameter_int(hstmt, 5, a.get_account_id());
             res = SQLExecute(hstmt);
 
             if(!SQL_SUCCEEDED(res))
@@ -302,7 +302,7 @@ void Audit_Log::login(SQLHDBC hdbc, User& u, const string& message, const string
             DB_Helper::bind_parameter_string(hstmt, 1, Actionlen, action);
             DB_Helper::bind_parameter_string(hstmt, 2, Statuslen, status);
             DB_Helper::bind_parameter_string(hstmt, 3, Messagelen, message);
-            DB_Helper::bind_parameter_int(hstmt, 4, u.user_id);
+            DB_Helper::bind_parameter_int(hstmt, 4, u.get_user_id());
             res = SQLExecute(hstmt);
 
             if(!SQL_SUCCEEDED(res))
@@ -389,15 +389,15 @@ void Audit_Log::user_not_available(SQLHDBC hdbc, User& u)
         {
             string message;
 
-            if(u.status_user == "CLOSED")
+            if(u.get_status_user() == "CLOSED")
             {
                 message = "USER_CLOSED";
             }
-            else if(u.status_user == "LOCKED")
+            else if(u.get_status_user() == "LOCKED")
             {
                 message = "USER_LOCKED";
             }
-            else if(u.status_user == "SUSPENDED")
+            else if(u.get_status_user() == "SUSPENDED")
             {
                 message = "USER_SUSPENDED";
             }
@@ -410,7 +410,7 @@ void Audit_Log::user_not_available(SQLHDBC hdbc, User& u)
             DB_Helper::bind_parameter_string(hstmt, 1, Actionlen, action);
             DB_Helper::bind_parameter_string(hstmt, 2, Statuslen, status);
             DB_Helper::bind_parameter_string(hstmt, 3, Messagelen, message);
-            DB_Helper::bind_parameter_int(hstmt, 4, u.user_id);
+            DB_Helper::bind_parameter_int(hstmt, 4, u.get_user_id());
 
             res = SQLExecute(hstmt);
 
@@ -457,8 +457,8 @@ void Audit_Log::transaction(SQLHDBC hdbc, Account& a, const string& dest_account
             SQLLEN Typelen, Statuslen;
 
             DB_Helper::bind_parameter_string(hstmt, 1, Typelen, type);
-            DB_Helper::bind_parameter_int(hstmt, 2, a.account_id);
-            DB_Helper::bind_parameter_int(hstmt, 3, a.account_id); //check status dest_account
+            DB_Helper::bind_parameter_int(hstmt, 2, a.get_account_id());
+            DB_Helper::bind_parameter_int(hstmt, 3, a.get_account_id()); //check status dest_account
             DB_Helper::bind_parameter_int(hstmt, 4, amount);
             DB_Helper::bind_parameter_string(hstmt, 5, Statuslen, status);
 

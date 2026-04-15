@@ -23,6 +23,6 @@ class AccountService
         };
 
         TRANSFER create_transaction(User& u, Account& a, string& dest_account, int amount);
-        LOAD_DATA refresh(User& u, Account& a);
+        LOAD_DATA refresh(User& u, Account& a, Session& s);
 
 };

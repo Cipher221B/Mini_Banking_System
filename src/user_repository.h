@@ -30,15 +30,14 @@ class User_Repository
         Repository_Result get_user_data(User& u, Session& s);
 
         //api login
-        Repository_Result get_user_information(User& u, Session& s, string& phone_number);
-        Repository_Result get_user_data_to_authentication(User& u, string& phone_number);
+        Repository_Result get_user_data_to_authentication(User& u, Session& s, string& phone_number);
         void get_user_role(User& u);
-        void get_version_db(Session& s);
+        int get_version_db(Session& s);
         void get_salt();
 
         //api registry
         Repository_Result add_new_user(User& u);
         // void create_password(User& u);
-        void set_role(User& u);
+        void set_role(const User& u);
 
 };

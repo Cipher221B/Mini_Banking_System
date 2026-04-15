@@ -30,13 +30,9 @@ class Account_Repository
 
         Account_Repository(SQLHDBC conn);
         //void handle_dup_create_account_no_system();
-
-        //handle error login api
-
-
-        //handle error transaction api
         
 
+        double get_balance(Account& a);
         //transaction api
         Repository_Result transaction(Account& a, string& dest_account, int amount);
         int get_sequence_account_no(Account& a);

@@ -4,7 +4,7 @@
 #include "hash.h"
 #include "system_errors.h"
 
-vector<unsigned char> Hash::encryption(string& password, vector<unsigned char>& salt, int iteration, int key_len)
+vector<unsigned char> Hash::encryption(const string& password, vector<unsigned char>& salt, int iteration, int key_len)
 {
     vector<unsigned char> hash(key_len);
     

@@ -25,6 +25,10 @@ class Account
 
         void make_type(int c);
 
+        //clear data
+        void clear_sensitive_data();
+        void clear_all_account_data();
+
         //getter
         int get_account_id(){return account_id;}
         int get_user_id(){return user_id;}

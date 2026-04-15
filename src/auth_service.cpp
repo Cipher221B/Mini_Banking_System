@@ -50,175 +50,182 @@ AuthService::GET_ACCOUNT AuthService::get_account_information(Account& a, Accoun
     
 }
 
-AuthService::GET_USER AuthService::get_user_information(User& u, Session& s, User_Repository& ur, string& phone_number)
+AuthService::GET_AUTHENTICATE_DATA AuthService::get_authenticate_information(User& u, Session& s, User_Repository& ur, string& phone_number)
 {
     User_Repository::Repository_Result repr = ur.get_user_information(u, s, phone_number);
 
     if(repr == User_Repository::Repository_Result::PHONE_NUMBER_DOES_NOT_EXIST)
     {
-        return GET_USER::PHONE_NUMBER_DOES_NOT_EXIST;
+        return GET_AUTHENTICATE_DATA::PHONE_NUMBER_DOES_NOT_EXIST;
     }
 
     ur.get_user_role(u);
 
-    return GET_USER::SUCCESS;
+    return GET_AUTHENTICATE_DATA::SUCCESS;
     
 }
 
 AuthService::LOGIN AuthService::login(User& u, Account& a, Session& s, string& phone_number, string& password, bool data_user_in_memory) // lỗi ở hàm login audit và check error sai dù nhập đúng
 {
-    DataBase conn; //Data Base Connection Error
-    User_Repository ur(conn.get_hdbc());
-    Account_Repository ar(conn.get_hdbc());
     try
     {
-        if(data_user_in_memory == true)
-        {
-            cout << "Already in data true\n";
-            AuthService::VERIFY v = authentication(u, a, password);
-            if(v == AuthService::VERIFY::USER_NOT_AVAILABLE)
+        DataBase conn; //Data Base Connection Error
+        User_Repository ur(conn.get_hdbc());
+        Account_Repository ar(conn.get_hdbc());
+        try
+        {   
+            if(data_user_in_memory == true)
             {
-                Audit_Log::user_not_available(conn.get_hdbc(), u);
-                return LOGIN::USER_NOT_AVAILABLE;
-            }
-            else if(v == AuthService::VERIFY::WRONG_PASSWORD)
-            {
-                Audit_Log::login(conn.get_hdbc(), a, "WRONG_PASSWORD", "FAILED");
-                return LOGIN::VERIFY_FAILED;
-            }
-            ur.get_session_version(u, s); 
-
-        }
-        else
-        {
-            // cout << "Already in data false\n";
-
-            //query trước để lấy salt, userid, phonenumber, password hash.
-            AuthService::GET_USER gu = get_user_information(u, s, ur, phone_number);
-            cout << "Done Get user\n";
-            if(gu == AuthService::GET_USER::PHONE_NUMBER_DOES_NOT_EXIST)
-            {
-                cout << "Already Get PNDNE\n";
-                Audit_Log::user_not_found(conn.get_hdbc(), u);
-                return LOGIN::USER_DOES_NOT_EXIST;
-            }
-            else if(gu == AuthService::GET_USER::SUCCESS)
-            {
-                // cout << "SUCCESS\n" ;
-                a.user_id = u.user_id;
+                cout << "Already in data true\n";
+                s.set_session_version(ur.get_version_db(s));
                 AuthService::VERIFY v = authentication(u, a, password);
-
-                if(v == AuthService::VERIFY::SUCCESS)
+                if(v == AuthService::VERIFY::USER_NOT_AVAILABLE)
                 {
-                    cout << "Get user Success\n";
-                    // get information account
-                    AuthService::GET_ACCOUNT ga = get_account_information(a, ar);
-
-                    if(ga == AuthService::GET_ACCOUNT::ACCOUNT_NOT_FOUND)
-                    {
-                        Audit_Log::login(conn.get_hdbc(), u, "ACCOUNT_NOT_FOUND", "FAILED");
-                        return LOGIN::ACCOUNT_NOT_FOUND;
-                    }
-
-                }
-                else if(v == AuthService::VERIFY::USER_NOT_AVAILABLE)
-                {
-
                     Audit_Log::user_not_available(conn.get_hdbc(), u);
                     return LOGIN::USER_NOT_AVAILABLE;
                 }
                 else if(v == AuthService::VERIFY::WRONG_PASSWORD)
                 {
-                    cout << "WRONG PASSS\n";
-
                     Audit_Log::login(conn.get_hdbc(), a, "WRONG_PASSWORD", "FAILED");
                     return LOGIN::VERIFY_FAILED;
                 }
 
             }
-        }
-        
+            else
+            {
+                // cout << "Already in data false\n";
 
-    }
-    catch(const Get_User_Error& e)
-    {
-        cout << "Get_User_Error\n";
-        try
+                //query trước để lấy salt, userid, phonenumber, password hash.
+                AuthService::GET_AUTHENTICATE_DATA gad = get_authenticate_information(u, s, ur, phone_number);
+                cout << "Done Get user\n";
+                if(gad == AuthService::GET_AUTHENTICATE_DATA::PHONE_NUMBER_DOES_NOT_EXIST)
+                {
+                    cout << "Already Get PNDNE\n";
+                    Audit_Log::user_not_found(conn.get_hdbc(), u);
+                    return LOGIN::USER_DOES_NOT_EXIST;
+                }
+                else if(gad == AuthService::GET_AUTHENTICATE_DATA::SUCCESS)
+                {
+                    // cout << "SUCCESS\n" ;
+                    u.set_phone_number(phone_number);
+                    a.set_user_id(u.get_user_id());
+                    AuthService::VERIFY v = authentication(u, a, password);
+
+                    if(v == AuthService::VERIFY::SUCCESS)
+                    {
+                        cout << "Get user Success\n";
+                        // get information account
+                        AuthService::GET_ACCOUNT ga = get_account_information(a, ar);
+
+                        if(ga == AuthService::GET_ACCOUNT::ACCOUNT_NOT_FOUND)
+                        {
+                            Audit_Log::login(conn.get_hdbc(), u, "ACCOUNT_NOT_FOUND", "FAILED");
+                            return LOGIN::ACCOUNT_NOT_FOUND;
+                        }
+
+                    }
+                    else if(v == AuthService::VERIFY::USER_NOT_AVAILABLE)
+                    {
+
+                        Audit_Log::user_not_available(conn.get_hdbc(), u);
+                        return LOGIN::USER_NOT_AVAILABLE;
+                    }
+                    else if(v == AuthService::VERIFY::WRONG_PASSWORD)
+                    {
+                        cout << "WRONG PASSS\n";
+
+                        Audit_Log::login(conn.get_hdbc(), a, "WRONG_PASSWORD", "FAILED");
+                        return LOGIN::VERIFY_FAILED;
+                    }
+
+                }
+            }
+            //check session version
+            if(Validate::check_session_version(s, ur.get_version_db(s)) == false)
+            {
+                u.clear_all_user_data();
+                a.clear_all_account_data();
+                Audit_Log::login(conn.get_hdbc(), a, "SESSION_VERSION_EXPIRED", "FAILED");
+                return LOGIN::SESSION_VERSION_EXPIRED;
+            }
+            Audit_Log::login(conn.get_hdbc(), a, "LOGIN_SUCCESSFUL", "SUCCESS");
+        }
+        catch(const Get_User_Error& e)
         {
-            Audit_Log::login(conn.get_hdbc(), u, "SYSTEM_ERROR", "FAILED");
+            cout << "Get_User_Error\n";
+            try
+            {
+                Audit_Log::login(conn.get_hdbc(), u, "SYSTEM_ERROR", "FAILED");
+            }
+            catch(const Create_Log_Error& e)
+            {
+                System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.what());
+            }
+            System_Log::error_log("Get Data Of User From DataBase Failed", e.filename_err, e.state, e.native_err, e.what());
+            return LOGIN::DATABASE_ERROR;
+
+        }
+        catch(const Get_Account_Error& e)
+        {
+            cout << "Get_Account_Error\n";
+            try
+            {
+                Audit_Log::login(conn.get_hdbc(), a, "SYSTEM_ERROR", "FAILED");
+            }
+            catch(const Create_Log_Error& e)
+            {
+                System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.what());
+            }
+            System_Log::error_log("Get Data Of Account From DataBase Failed", e.filename_err, e.state, e.native_err, e.what());
+            return LOGIN::DATABASE_ERROR;
+        }
+        catch(const Get_Data_Error& e) // case null data
+        {
+            cout << "Get_Data_Error\n";
+
+            try
+            {
+                Audit_Log::login(conn.get_hdbc(), a, "SYSTEM_ERROR", "FAILED");
+            }
+            catch(const Create_Log_Error& e)
+            {
+                System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.what());
+            }
+            System_Log::error_log("Get Data From DataBase Failed", e.filename_err, e.state, e.native_err, e.what());
+            return LOGIN::DATABASE_ERROR;
+        }
+        catch(const Data_Error& e)
+        {
+            //check lại vụ null data
+            System_Log::error_log("Null Data Detected", e.filename_err, e.state, e.native_err, e.what());
+            return LOGIN::DATABASE_ERROR;
         }
         catch(const Create_Log_Error& e)
         {
-            System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.what());
+            System_Log::error_log("Create Log Failed", e.filename_err, e.state, e.native_err, e.what());
+            return LOGIN::DATABASE_ERROR; // !!!!return sai
         }
-        System_Log::error_log("Get Data Of User From DataBase Failed", e.filename_err, e.state, e.native_err, e.what());
-        return LOGIN::DATABASE_ERROR;
+        catch(const Hash_Algorithm_Error& e)
+        {
+            System_Log::error_log("Login Hash Failed", e.filename_err, e.what());
+            return LOGIN::HASH_FAILED;
+        }
 
     }
-    catch(const Get_Account_Error& e)
+    catch(const ConnectionErrors& e)
     {
-        cout << "Get_Account_Error\n";
-        try
-        {
-            Audit_Log::login(conn.get_hdbc(), a, "SYSTEM_ERROR", "FAILED");
-        }
-        catch(const Create_Log_Error& e)
-        {
-            System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.what());
-        }
-        System_Log::error_log("Get Data Of Account From DataBase Failed", e.filename_err, e.state, e.native_err, e.what());
-        return LOGIN::DATABASE_ERROR;
+        cout << "Connection_Error\n";
+        System_Log::error_log("DataBase Connection Failed", e.filename_err, e.state, e.native_err, e.what());
+        return LOGIN::CONNECTION_FAILED;
     }
-    catch(const Get_Data_Error& e) // case null data
-    {
-        cout << "Get_Data_Error\n";
-
-        try
-        {
-            Audit_Log::login(conn.get_hdbc(), a, "SYSTEM_ERROR", "FAILED");
-        }
-        catch(const Create_Log_Error& e)
-        {
-            System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.what());
-        }
-        System_Log::error_log("Get Data From DataBase Failed", e.filename_err, e.state, e.native_err, e.what());
-        return LOGIN::DATABASE_ERROR;
-    }
-    catch(const Data_Error& e)
-    {
-        //check lại vụ null data
-        System_Log::error_log("Null Data Detected", e.filename_err, e.state, e.native_err, e.what());
-        return LOGIN::DATABASE_ERROR;
-    }
-    catch(const Create_Log_Error& e)
-    {
-        System_Log::error_log("Create Log Failed", e.filename_err, e.state, e.native_err, e.what());
-        return LOGIN::DATABASE_ERROR; // !!!!return sai
-    }
-    catch(const Hash_Algorithm_Error& e)
-    {
-        System_Log::error_log("Login Hash Failed", e.filename_err, e.what());
-        return LOGIN::HASH_FAILED;
-    }
-
-    //catch các ngoại lệ bắt buộc same in registry
-    try
-    {
-        Audit_Log::login(conn.get_hdbc(), a, "LOGIN_SUCCESSFUL", "SUCCESS");
-    }
-    catch(const Create_Log_Error& e)
-    {
-        System_Log::error_log("Audit Log Failed Detected", e.filename_err, e.what());
-    }
-
-    return LOGIN::SUCCESS;
     
+    return LOGIN::SUCCESS;
 }
 
 void AuthService::handle_duplicate_account_no(DataBase& conn, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr)
 {
     a.set_account_no(create_account_no(a, ar));
-    check_error(conn, u, a, ar, ar.add_account(u, a));
+    check_error(conn, a, ar, ar.add_account(a));
 }
 
 void AuthService::check_error(DataBase& conn, Account& a, Account_Repository& ar, Account_Repository::Repository_Result repr)
@@ -262,7 +269,7 @@ AuthService::REGISTER AuthService::registry(User& u, Account& a)
                 DB_Helper::rollback(conn.get_hdbc());
                 return REGISTER::E_DUPLICATE_PHONE_NO;
             }
-
+            
             // cout << "check_err done\n";
             Audit_Log::user_register(conn.get_hdbc(), u, "USER_CREATED", "SUCCESS");
             a.set_user_id(u.get_user_id());
@@ -321,7 +328,7 @@ AuthService::REGISTER AuthService::registry(User& u, Account& a)
         System_Log::error_log("DataBase Connection Failed", e.filename_err, e.state, e.native_err, e.what());
         return REGISTER::CONNECTION_FAILED;
     }
-    cout << "success\n";
+    // cout << "success\n";
 
     return REGISTER::SUCCESS;
    

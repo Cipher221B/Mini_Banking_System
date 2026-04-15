@@ -88,7 +88,7 @@ class CLI
         void create_full_name(User& u);
         void create_phone(User& u);
         void create_password(User& u);
-        void input_type_account();
+        int input_type_account();
         void account_information(Account& a);
         State handle_register(User& u, Account& a);
 

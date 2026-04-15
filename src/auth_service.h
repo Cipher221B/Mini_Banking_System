@@ -30,12 +30,13 @@ class AuthService
             VERIFY_FAILED,
             USER_NOT_AVAILABLE,
             HASH_FAILED,
+            SESSION_VERSION_EXPIRED,
             SUCCESS,
             FAILED
 
         };
 
-        enum class GET_USER
+        enum class GET_AUTHENTICATE_DATA
         {
             SUCCESS,
             PHONE_NUMBER_DOES_NOT_EXIST
@@ -62,7 +63,7 @@ class AuthService
 
         //login api
         LOGIN login(User& u, Account& a, Session& s, string& phone_number, string& password, bool data_user_in_memory);
-        GET_USER get_user_information(User& u, Session& s, User_Repository& ur, string& phone_number);
+        GET_AUTHENTICATE_DATA get_authenticate_information(User& u, Session& s, User_Repository& ur, string& phone_number);
         GET_ACCOUNT get_account_information(Account& a, Account_Repository& ar);
         VERIFY authentication(User& u, Account& a, string& password);
 

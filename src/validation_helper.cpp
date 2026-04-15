@@ -85,7 +85,7 @@ string Validate::check_role(User& u, Account& a)
 
 }
 
-bool Validate::check_ssession(Session& s, int current_session_on_db)
+bool Validate::check_session_version(Session& s, int current_session_on_db)
 {
     if(s.get_session_version() != current_session_on_db)
     {

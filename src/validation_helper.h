@@ -14,6 +14,6 @@ class Validate
         static bool check_permission_to_create_transaction(User& u);
         static bool check_status_user(User& u);
         static bool verify(User& u, string& p);
-        static bool check_session(Session& s, int current_session_on_db);
+        static bool check_session_version(Session& s, int current_session_on_db);
         static string check_role(User& u, Account& a);
 };

@@ -177,9 +177,10 @@ CLI::State_Admin_DashBoard CLI::admin_activity()
     
 }
 
+
 CLI::State CLI::main_control_admin_dash_board(User& u, Account& a, Session& s)
 {
-    if(refresh_data(u, a) == AccountService::LOAD_DATA::SUCCESSS)
+    
     {
         CLI::State_Admin_DashBoard sa = CLI::State_Admin_DashBoard::ADMIN_MENU;
 
@@ -191,6 +192,7 @@ CLI::State CLI::main_control_admin_dash_board(User& u, Account& a, Session& s)
                 {
                     sa = admin_activity();
                     break;
+                    
                 }
                 case (CLI::State_Admin_DashBoard::VIEW_USER):
                 {
@@ -223,24 +225,14 @@ CLI::State CLI::define_state_login(User& u, Account& a, AuthService::LOGIN l)
     if(l == AuthService::LOGIN::SUCCESS)
     {
         string cs = Validate::check_role(u, a);
+        u.clear_sensitive_data();
         if(cs == "ADMIN")
         {
-            cout << "-------------------------------------\n";
-            cout << " Press any key to continue...\n";
-
-            cin.ignore();  // clear buffer
-            cin.get();     // wait for key press
-
             return State::ADMIN_MENU;
 
         }
         else if(cs == "CUSTOM")
         {
-            cout << "-------------------------------------\n";
-            cout << " Press any key to continue...\n";
-
-            cin.ignore();  // clear buffer
-            cin.get();     // wait for key press
 
             return State::CUSTOM_MENU;
         }
@@ -255,6 +247,10 @@ CLI::State CLI::define_state_login(User& u, Account& a, AuthService::LOGIN l)
         cin.get();     // wait for key press
         show_failed_interface("LOGIN FAILED", "DataBase Error!!! Please Contact with Admin to give a support!");
 
+    }
+    else if(l == AuthService::LOGIN::CONNECTION_FAILED)
+    {
+        show_failed_interface("LOGIN FAILED", "Connnection Error!!! Please Contact with Admin to give a support!");
     }
     else if(l == AuthService::LOGIN::USER_DOES_NOT_EXIST)
     {
@@ -278,6 +274,13 @@ CLI::State CLI::define_state_login(User& u, Account& a, AuthService::LOGIN l)
         show_failed_interface("LOGIN FAILED", "User Not Available!!!");
 
     }
+    else if (l == AuthService::LOGIN::SESSION_VERSION_EXPIRED)
+    {
+        show_failed_interface("LOGIN FAILED", "Login session has expired! Try Again!!!");
+    }
+
+    u.clear_all_user_data();
+    a.clear_all_account_data();
     return State::MAIN_MENU;
 }
 
@@ -310,7 +313,7 @@ CLI::State CLI::handle_login(Session& s, User& u, Account& a)
     show_login_interface(phone_number, password);
     AuthService::LOGIN l;
 
-    if(pr_state == State::REGISTER && (phone_number == u.phone_number))
+    if(pr_state == State::REGISTER && (phone_number == u.get_phone_number()))
     {
         AuthService as;
         l = as.login(u, a, s, phone_number, password, 1);
@@ -426,6 +429,7 @@ void CLI::account_information(Account& a)
     {
         a.make_type(input_type_account());
         a.set_status("ACTIVE");
+        a.set_balance(0);
     }
     catch(const Invalid_Input& e)
     {
@@ -501,28 +505,24 @@ CLI::State CLI::handle_register(User& u, Account& a)
         break;
 
     }
-
-    if(r == AuthService::REGISTER::CREATE_USER_FAILED || r == AuthService::REGISTER::CREATE_ACCOUNT_FAILED || r == AuthService::REGISTER::HASH_FAILED )
+    if(r == AuthService::REGISTER::SUCCESS)
     {
-        cout << "-------------------------------------\n";
-        cout << " Press any key to continue...\n";
-        cin.ignore(); 
-        cin.get();     
+        show_register_success_interface(u);
+        return State::LOGIN;
+    }
+    else if(r == AuthService::REGISTER::CREATE_USER_FAILED || r == AuthService::REGISTER::CREATE_ACCOUNT_FAILED || r == AuthService::REGISTER::HASH_FAILED )
+    {
         show_failed_interface("REGISTER FAILED", "DataBase Error!!! Please Contact with Admin to give a support!");
+        u.clear_all_user_data();
+        a.clear_all_account_data();
         return State::MAIN_MENU;
     }
     else
     {
+        u.clear_all_user_data();
+        a.clear_all_account_data();
         switch(r)
         {
-            case(AuthService::REGISTER::SUCCESS):
-            {
-                cout << "-------------------------------------\n";
-                cout << " Press any key to continue...\n";
-                cin.ignore(); 
-                show_register_success_interface(u);
-                return State::LOGIN;
-            }
             case(AuthService::REGISTER::CONNECTION_FAILED):
             {
                 cout << "-------------------------------------\n";
@@ -542,10 +542,9 @@ CLI::State CLI::handle_register(User& u, Account& a)
 
         }
     }
-    cout << "-------------------------------------\n";
-    cout << " Press any key to continue...\n";
-    cin.ignore(); 
     show_failed_interface("REGISTER FAILED", "Register Failed!!! Check Your Information and Try Again!");
+    u.clear_all_user_data();
+    a.clear_all_account_data();
     return State::MAIN_MENU;
 
 }
@@ -564,7 +563,7 @@ void CLI::show_start_interface()
     cout << "2. I already have an account before! Login?\n";
     cout << "3. Exit Program!\n";
     cout << "-------------------------------------\n";
-    cout << "Enter (1) or (2) to start: ";
+    cout << "Enter (1) or () to start: ";
 
 }
 

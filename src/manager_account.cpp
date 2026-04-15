@@ -75,3 +75,17 @@ void Account::make_type(int c)
 
 }
 
+void Account::clear_sensitive_data()
+{
+    balance = 0;
+    status.clear();
+}
+
+void Account::clear_all_account_data()
+{
+    account_id = 0;
+    user_id = 0;
+    account_no.clear();
+    type.clear();
+    clear_sensitive_data();
+}

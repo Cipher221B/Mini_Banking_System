@@ -29,10 +29,10 @@ class DB_Helper
         static void handle_error_account_transaction(SQLSMALLINT type_err, SQLHANDLE handle_err, SQLSMALLINT type_free, SQLHANDLE handle_free);
 
         //wrapper
-        static void bind_parameter_int(SQLHSTMT hstmt, int col, int& value);
-        static void bind_parameter_bool(SQLHSTMT hstmt, int col, bool& value);
+        static void bind_parameter_int(SQLHSTMT hstmt, int col, const int& value);
+        static void bind_parameter_bool(SQLHSTMT hstmt, int col, const bool& value);
         static void bind_parameter_string(SQLHSTMT hstmt, int col, SQLLEN& value_len, const string& value);
-        static void bind_parameter_vector(SQLHSTMT hstmt, int col, SQLLEN& value_len, vector<unsigned char>& value);
+        static void bind_parameter_vector(SQLHSTMT hstmt, int col, SQLLEN& value_len, const vector<unsigned char>& value);
 
         static void bind_col_int(SQLHSTMT hstmt, int col, int& value);
         static void bind_col_double(SQLHSTMT hstmt, int col, double& value);

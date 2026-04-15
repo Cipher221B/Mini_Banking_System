@@ -25,7 +25,7 @@ void User::set_credential(const string& password)
 
 void User::set_credential(vector<unsigned char>& password_hash)
 {
-    if(password_hash == 32)
+    if(password_hash.size() == 32)
     {
         credential = password_hash;
     }
@@ -64,7 +64,7 @@ void User::set_status_user(const string& s)
 
 void User::set_user_id(int i)
 {
-    id = i;
+    user_id = i;
 }
 
 void User::creat_salt()
@@ -79,9 +79,8 @@ void User::clear_sensitive_data()
 
     fill(salt.begin(), salt.end(), 0);
     salt.clear();
-
-    status_user;
-
+    
+    status_user.clear();
     role_id = 0;
 }
 
@@ -91,5 +90,5 @@ void User::clear_all_user_data()
     full_name.clear();
     phone_number.clear();
 
-    clear_dynamic_data();
+    clear_sensitive_data();
 }
