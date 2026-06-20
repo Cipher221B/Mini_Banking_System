@@ -1,0 +1,15 @@
+{"action":"LOGIN","category":"Authentication","detail":"LOGIN_SUCCESSFUL","event_time":"2026-06-19T13:50:36.8800000+07:00","ip_address":"10.0.0.10","status":"SUCCESS","target_accountid":1,"userid":1}
+{"action":"LOGOUT","category":"Authentication","detail":"SESSION_VERSION_EXPIRED","event_time":"2026-06-19T13:51:05.3500000+07:00","ip_address":"10.0.0.10","status":"SUCCESS","target_accountid":1,"userid":1}
+{"action":"LOGIN","category":"Authentication","detail":"WRONG_PASSWORD","event_time":"2026-06-19T13:51:25.3966667+07:00","ip_address":"10.0.0.10","status":"FAILED","target_accountid":1,"userid":1}
+{"action":"REGISTER","category":"Authentication","detail":"USER_CREATED","event_time":"2026-06-19T13:51:49.0966667+07:00","ip_address":"198.51.100.247","status":"SUCCESS","target_accountid":null,"userid":2}
+{"action":"REGISTER","category":"Authentication","detail":"ACCOUNT_CREATED","event_time":"2026-06-19T13:51:49.1166667+07:00","ip_address":"198.51.100.247","status":"SUCCESS","target_accountid":2,"userid":2}
+{"action":"LOGIN","category":"Authentication","detail":"LOGIN_SUCCESSFUL","event_time":"2026-06-19T13:52:08.3200000+07:00","ip_address":"172.20.10.108","status":"SUCCESS","target_accountid":2,"userid":2}
+{"action":"LOGOUT","category":"Authentication","detail":"USER_LOGGED_OUT","event_time":"2026-06-19T13:52:31.0766667+07:00","ip_address":"172.20.10.108","status":"SUCCESS","target_accountid":2,"userid":2}
+{"action":"REGISTER","category":"Authentication","detail":"USER_CREATED","event_time":"2026-06-19T13:52:47.0400000+07:00","ip_address":"198.51.100.213","status":"SUCCESS","target_accountid":null,"userid":3}
+{"action":"REGISTER","category":"Authentication","detail":"ACCOUNT_CREATED","event_time":"2026-06-19T13:52:47.0533333+07:00","ip_address":"198.51.100.213","status":"SUCCESS","target_accountid":3,"userid":3}
+{"action":"LOGIN","category":"Authentication","detail":"LOGIN_SUCCESSFUL","event_time":"2026-06-19T13:52:57.9500000+07:00","ip_address":"172.20.10.108","status":"SUCCESS","target_accountid":2,"userid":2}
+{"action":"LOGOUT","category":"Authentication","detail":"USER_LOGGED_OUT","event_time":"2026-06-19T13:53:28.7833333+07:00","ip_address":"172.20.10.108","status":"SUCCESS","target_accountid":2,"userid":2}
+{"action":"LOGIN","category":"Authentication","detail":"WRONG_PASSWORD","event_time":"2026-06-19T13:53:40.7500000+07:00","ip_address":"10.0.0.10","status":"FAILED","target_accountid":1,"userid":1}
+{"action":"LOGIN","category":"Authentication","detail":"USER_NOT_FOUND","event_time":"2026-06-19T13:53:46.5333333+07:00","ip_address":"198.51.100.104","status":"FAILED","target_accountid":null,"userid":null}
+{"action":"LOGIN","category":"Authentication","detail":"LOGIN_SUCCESSFUL","event_time":"2026-06-19T13:54:00.1066667+07:00","ip_address":"10.0.0.10","status":"SUCCESS","target_accountid":1,"userid":1}
+{"action":"LOGOUT","category":"Authentication","detail":"USER_LOGGED_OUT","event_time":"2026-06-19T13:54:30.5000000+07:00","ip_address":"10.0.0.10","status":"SUCCESS","target_accountid":1,"userid":1}

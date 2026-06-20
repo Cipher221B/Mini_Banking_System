@@ -1,0 +1,2 @@
+{"category":"Activity","detail":"PASSWORD_CHANGED_SUCCESSFULLY","event_time":"2026-06-19T13:51:03.6066667+07:00","status":"SUCCESS","target_accountid":null,"target_userid":1,"type_activity":"CHANGE_PASSWORD","userid":1}
+{"category":"Activity","detail":"ACTIVE -> SUSPENDED","event_time":"2026-06-19T13:54:26.8933333+07:00","status":"SUCCESS","target_accountid":null,"target_userid":3,"type_activity":"CHANGE_STATUS_USER","userid":1}

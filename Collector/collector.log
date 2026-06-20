@@ -1,0 +1,30 @@
+2026-06-08 14:08:46.731 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:11:25.048 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:11:35.104 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:11:45.158 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:16:46.866 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:16:56.947 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:17:07.062 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:22:27.474 [repository/log_repository.cpp:216] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:22:37.579 [repository/log_repository.cpp:216] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:30:45.249 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-08 14:30:55.322 [repository/log_repository.cpp:293] Collector Access Log Data Failed state=22002 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Indicator variable required but not supplied
+2026-06-10 07:02:56.352 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:03:06.628 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:03:16.791 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:03:26.989 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:13:26.829 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:13:36.999 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:14:26.371 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:15:43.893 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:15:54.055 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:16:20.565 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:16:30.784 [repository/log_repository.cpp:144] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:19:51.189 [repository/log_repository.cpp:147] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:20:01.375 [repository/log_repository.cpp:147] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:22:44.867 [repository/log_repository.cpp:147] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:24:22.128 [repository/log_repository.cpp:147] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:27:14.574 [repository/log_repository.cpp:157] Collector Access Log Data Failed state=22018 native=0 message='[Microsoft][ODBC Driver 17 for SQL Server]Invalid character value for cast specification
+2026-06-10 07:49:19.008 [audit_logger.cpp:113] Export Log Failed message='Can't export log to this file: 'Banking_logs/authentication_log.json'.'.
+2026-06-10 07:50:00.752 [audit_logger.cpp:113] Export Log Failed message='Can't export log to this file: 'Banking_logs/authentication_log.json'.'.
+2026-06-10 07:51:45.822 [audit_logger.cpp:113] Export Log Failed message='Can't export log to this file: 'Banking_logs/authentication_log.json'.'.
