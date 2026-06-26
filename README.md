@@ -82,7 +82,6 @@ The project focuses on:
 | SIEM Platform         | Wazuh                |
 | Operating System      | Windows              |
 
-   
 ## 🎯 Core Goal   
 
 - Simulate authentication and transaction behavior in a CLI banking environment
