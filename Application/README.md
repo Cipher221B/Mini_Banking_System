@@ -1,11 +1,58 @@
 # 🏦 MiniBanking SIEM Lab
 (Simulating banking operations, authentication flows, and security telemetry for SIEM correlation and analysis)   
    
+## 🔄 Security Telemetry Pipeline
+
+The project implements a complete telemetry pipeline that simulates how security events are generated, processed, and delivered to a SIEM platform.
+
+The overall workflow is illustrated below.
+
+```
+Application
+      │
+      ▼
+SQL Server
+(Auth_Logs / Activity_Logs / Transactions)
+      │
+      ▼
+Collector
+(Incremental Batch Reading + Normalization)
+      │
+      ▼
+Banking_logs
+(JSON Telemetry Files)
+      │
+      ▼
+Wazuh Agent
+      │
+      ▼
+Wazuh Manager
+      │
+      ▼
+Wazuh Dashboard
+```
+
+Each component has a dedicated responsibility:
+
+- **Application** generates security-related events and stores them in SQL Server.
+- **Collector** continuously synchronizes newly created records using checkpoint-based incremental collection.
+- **Banking_logs** acts as the telemetry source consumed by the Wazuh Agent.
+- **Wazuh** parses, indexes, and visualizes security events for monitoring and analysis.
+   
+
 ## 📌 Project Overview   
 
 Mini Banking is a CLI-based banking simulation system
 built with C++ and connected to a local SQL Server
 through ODBC.
+
+The project simulates a simplified banking environment while focusing on security engineering concepts such as authentication, authorization, security telemetry generation, log normalization, and SIEM integration.
+
+The system consists of three major components:
+
+`Application` – Simulates banking operations and generates security events.   
+`Collector` – Collects security logs from SQL Server, normalizes them into JSON telemetry, and prepares them for SIEM ingestion.   
+`Shared` – Provides reusable database, logging, and utility components shared by both the Application and Collector.   
 
 The project focuses on:
 
@@ -20,6 +67,21 @@ The project focuses on:
 - Role-based operations (user/admin functionality separation).
 
 - Simulated IP address generation for telemetry and SIEM-oriented analysis.   
+
+- Batch log collection, normalization, and SIEM-oriented event pipelines.   
+
+## 🛠️ Technology Stack
+
+| Category              | Technology           |
+| --------------------- | -------------------- |
+| Programming Language  | C++17                |
+| Database              | Microsoft SQL Server |
+| Database Connectivity | ODBC                 |
+| Cryptography          | OpenSSL (PBKDF2)     |
+| Build System          | MinGW / Makefile     |
+| Data Format           | JSON                 |
+| SIEM Platform         | Wazuh                |
+| Operating System      | Windows              |
    
 ## 🎯 Core Goal   
 
@@ -29,9 +91,9 @@ The project focuses on:
 
 - Model session validation and role-based authorization.
 
-- Support attack simulation and SIEM-oriented security analysis.
+- Build a security telemetry pipeline from SQL Server to SIEM.   
 
-- Explore security engineering concepts through a lightweight banking system.   
+- Support attack simulation, detection engineering, and SIEM-oriented security analysis.
    
 ## 📍 Main Feature    
    
@@ -43,67 +105,218 @@ The project focuses on:
     - Banking transaction simulation (transfer operations).   
 - [x] Administrative controls (change user/account status).   
 - [x] Authentication, Activity, Transaction and System Error logging.
+- [x] Collect log from Database via Collector and send to Wazuh. 
+   
+## 📦 Repository Layout
+
+The repository is organized into independent modules to separate business logic, telemetry processing, and shared infrastructure.
+
+| Module           | Responsibility                                                                              |
+| ---------------- | ------------------------------------------------------------------------------------------- |
+| **Application**  | Banking system implementation, authentication, transactions, and security event generation. |
+| **Collector**    | Incremental log collection, normalization, and JSON telemetry export.                       |
+| **Shared**       | Common database, logging, and utility components shared across the project.                 |
+| **Banking_logs** | Generated JSON telemetry monitored by the Wazuh Agent.                                      |
+
+Each module contains its own documentation describing its architecture and implementation details.
    
 ## 🏗️ Architecture Overview   
 
 The project follows a modular architecture with separation between:
+The project is organized into three independent components, each with a distinct responsibility in the security monitoring pipeline.
 
-- 🖥️ `Interface Layer` Handles CLI menus, user interaction and screen rendering.
+### 1. 🖥️ Application
 
-- ⚙️ `Service Layer` Handles business logic such as authentication, transactions, authorization checks, and session validation.
+Implements the banking system and business logic, including user authentication, authorization, session management, banking transactions, and administrative operations.
 
-- 🗄️ `Repository Layer` Handles database communication and SQL operations through ODBC.
+The Application generates security events and stores them in SQL Server for later analysis.
 
-Additionally, the project includes supporting modules for:
+Internally, the Application follows a layered architecture consisting of:
 
-- 🔒 Security utilities (password hashing, salt generation, random data generation. For example: account number, transaction code, IP address generation/simulation to support consistency in simulating scenarios.).
+- 🖥️ `Interface Layer` – Handles CLI menus, user interaction and screen rendering.
+- ⚙️ `Service Layer` – Handles business logic such as authentication, transactions, authorization checks, and session validation.
+- 🗄️ `Repository Layer` – Database communication through ODBC.
+- 🤝 `Supporting Modules` – Security utilities, logging helper service , input validation, and helper functions.
 
-- 🛢️ Database connection management.
+### 2. 📡 Collector
 
-- 📝 Logging and file handling.
+The Collector is an independent component responsible for building the telemetry pipeline.
 
-- ⌨️ Input Verification.   
+Its responsibilities include:
+
+- Collecting security logs from SQL Server.
+- Processing logs in batches.
+- Normalizing records into structured JSON events.
+- Exporting telemetry for SIEM ingestion (Wazuh).
+
+The Collector is intentionally separated from the Application so that telemetry processing can evolve independently from the banking system.
+
+### 3. 📦 Shared
+
+The Shared component provides reusable modules shared by both the Application and the Collector.
+
+It contains:
+
+- Database connection management.
+- Common logging utilities.
+- Database helper functions.
+- Shared error handling.
+- File handling utilities.
+
+This separation avoids code duplication while keeping common functionality centralized.
    
 ## 📐 Project Structure   
    
 ```text
 Mini_Banking
-|   ip_profile.txt
-|   Makefile
 |   README.md
-|   system.log
 |
-+---docs
++---Application
+|   |   ip_profile.txt
+|   |   Makefile
 |   |   README.md
+|   |   system.log
 |   |
-|   +---erd
-|   |       erd.png
+|   +---docs
+|   |   |   README.md
+|   |   |
+|   |   +---erd
+|   |   |       erd.png
+|   |   |
+|   |   +---flowcharts
+|   |   |       change_password_flow.png
+|   |   |       change_status_user_flow.png
+|   |   |       login_flow.png
+|   |   |       transfer_flow.png
+|   |   |
+|   |   \---screenshots
+|   |           admin_menu.png
+|   |           change_password_success_interface.png
+|   |           change_status_user_success_interface.png
+|   |           custom_menu.png
+|   |           telemetry_logs.png
+|   |           transfer_success_interface.png
 |   |
-|   +---flowcharts
-|   |       change_password_flow.png
-|   |       change_status_user_flow.png
-|   |       login_flow.png
-|   |       transfer_flow.png
+|   +---query_sql
+|   |       create_user.sql
+|   |       query_transaction.sql
 |   |
-|   \---screenshots
-|           admin_menu.png
-|           change_password_success_interface.png
-|           change_status_user_success_interface.png
-|           custom_menu.png
-|           telemetry_logs.png
-|           transfer_success_interface.png
+|   +---sql
+|   |       Mini_Banking.sql
+|   |
+|   \---src
+|       |   interface.cpp
+|       |   interface.h
+|       |   main.cpp
+|       |
+|       +---data
+|       |       transaction_information.h
+|       |
+|       +---entity
+|       |       account.cpp
+|       |       account.h
+|       |       session.cpp
+|       |       session.h
+|       |       user.cpp
+|       |       user.h
+|       |
+|       +---error
+|       |       bussiness_error.h
+|       |       layer_error.h
+|       |
+|       +---logging
+|       |       audit_log.cpp
+|       |       audit_log.h
+|       |
+|       +---repository
+|       |       account_repository.cpp
+|       |       account_repository.h
+|       |       user_repository.cpp
+|       |       user_repository.h
+|       |
+|       +---security
+|       |       hash.cpp
+|       |       hash.h
+|       |       random_generation.cpp
+|       |       random_generation.h
+|       |
+|       +---service
+|       |       account_service.cpp
+|       |       account_service.h
+|       |       auth_service.cpp
+|       |       auth_service.h
+|       |
+|       \---utils
+|               input_validation.cpp
+|               input_validation.h
+|               ip_manager.cpp
+|               ip_manager.h
+|               log_service.cpp
+|               log_service.h
+|               repository_error_handle.h
+|               string_utils.cpp
+|               string_utils.h
 |
-+---query_sql
-|       create_user.sql
-|       query_transaction.sql
++---Banking_logs
+|       activity_log.json
+|       authentication_log.json
+|       transaction_log.json
 |
-+---sql
-|       Mini_Banking.sql
++---Collector
+|   |   collector.log
+|   |   main.cpp
+|   |   Makefile
+|   |
+|   +---data
+|   |       category_batch.h
+|   |       category_log.h
+|   |
+|   +---docs
+|   |   |   README.md
+|   |   |
+|   |   +---architecture
+|   |   |       collector_architecture.png
+|   |   |
+|   |   +---database
+|   |   |       checkpoint_table.png
+|   |   |
+|   |   +---flowcharts
+|   |   |       collector_pipeline.png
+|   |   |
+|   |   \---screenshots
+|   |           activity_log_json_file.png
+|   |           authentication_log_json_file.png
+|   |           collector_console.png
+|   |           transaction_log_json_file.png
+|   |
+|   +---error
+|   |       collector_error_handle.h
+|   |
+|   +---logging
+|   |       audit_logger.cpp
+|   |       audit_logger.h
+|   |
+|   +---normalize
+|   |       log_normalizer.cpp
+|   |       log_normalizer.h
+|   |
+|   +---repository
+|   |       log_repository.cpp
+|   |       log_repository.h
+|   |
+|   +---service
+|   |       collector_service.cpp
+|   |       collector_service.h
+|   |
+|   \---signal
+|           signal_manager.cpp
+|           signal_manager.h
 |
-\---src
-    |   interface.cpp
-    |   interface.h
-    |   main.cpp
+\---Shared
+    |   README.md
+    |
+    +---data
+    |       sql_error.h
     |
     +---database
     |       db_connection.cpp
@@ -111,58 +324,19 @@ Mini_Banking
     |
     +---error
     |       database_errors.h
-    |       layer_error.h
     |       system_errors.h
     |
-    +---helper
-    |       db_helper.cpp
-    |       db_helper.h
-    |       file_handle.cpp
-    |       file_handle.h
-    |       input_validation.cpp
-    |       input_validation.h
-    |       log_service.cpp
-    |       log_service.h
-    |       odbc_helper_error.cpp
-    |       odbc_helper_error.h
-    |       string_utils.cpp
-    |       string_utils.h
-    |
-    +---identity
-    |       account.cpp
-    |       account.h
-    |       session.cpp
-    |       session.h
-    |       user.cpp
-    |       user.h
-    |
-    +---log
-    |       audit_log.cpp
-    |       audit_log.h
+    +---logging
     |       system_log.cpp
     |       system_log.h
     |
-    +---repository
-    |       account_repository.cpp
-    |       account_repository.h
-    |       user_repository.cpp
-    |       user_repository.h
-    |
-    +---security
-    |       hash.cpp
-    |       hash.h
-    |       random_generation.cpp
-    |       random_generation.h
-    |
-    +---service
-    |       account_service.cpp
-    |       account_service.h
-    |       auth_service.cpp
-    |       auth_service.h
-    |
-    \---storage
-            sql_error.h
-            transaction_information.h
+    \---utils
+            db_helper.cpp
+            db_helper.h
+            file_handle.cpp
+            file_handle.h
+            odbc_helper_error.cpp
+            odbc_helper_error.h
 ```   
    
 ## 🗃️ Database Design   
@@ -177,6 +351,7 @@ Mini_Banking
 | `Transactions` | Transfer Activity | 
 | `Activity_Logs` | Record user, account activities | 
 | `User_Security` | Sensitive authentication information |    
+| `Collector_CheckPoint` | Stores information about the last location where the Collector stopped during the previous read |
    
 ## 🔒 Security Concepts   
    
@@ -195,7 +370,9 @@ The project includes several security-oriented mechanisms to simulate authentica
 
 - Simulated IP address generation for SIEM-oriented analysis.
 
-- System error logging for operational monitoring and debugging.   
+- System error logging for operational monitoring and debugging.
+
+- Batch log collection from SQL Server and Security event normalization into JSON telemetry.   
    
 ## 🛠️ Build & Run   
 ### Requirements
@@ -206,16 +383,30 @@ The project includes several security-oriented mechanisms to simulate authentica
 - ODBC Driver
 - OpenSSL
 
-### Build
+### 💻 Build Application
 
 ```bash
+cd Application
 mingw32-make
 ```
 
 ### Run
 
 ```bash
-mingw32-make run
+./application.exe
+```
+
+### 📥 Build Collector
+
+```bash
+cd Collector
+mingw32-make
+```
+
+### Run
+
+```bash
+./collector.exe
 ```
 
 ### Database Setup
@@ -223,7 +414,7 @@ mingw32-make run
 Run the SQL scripts inside:
 
 ```text
-/sql
+/Application/sql
 ```   
    
 ## ⚠️ Limitations   
@@ -247,13 +438,20 @@ Run the SQL scripts inside:
    
 ## 🚀 Future Improvements   
 
-🔧 Web/UI interface.   
-   
-🔧 Multiple thread.   
-   
-🔧 1 user <-> multiple account.   
+🔧 Web-based banking interface.
 
-🔧 Real Network telemetry.   
-   
-🔧 Adding more features can create more exploitation opportunities.   
-   
+🔧 Multi-threaded telemetry collection.
+
+🔧 Real network telemetry instead of simulated IP generation.
+
+🔧 Real-time event streaming instead of polling.
+
+🔧 Custom Wazuh detection rules for banking attack scenarios.
+
+🔧 Interactive SIEM dashboards and visualizations.
+
+🔧 Multi-agent deployment for distributed environments.
+
+🔧 Docker-based deployment for the complete telemetry pipeline.
+
+🔧 Additional telemetry sources (Windows Event Logs, Sysmon, Syslog).

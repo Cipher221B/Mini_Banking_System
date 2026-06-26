@@ -25,7 +25,10 @@ Repository Layer
 SQL Server
 ```   
 
-In addition to the main request path, supporting modules provide security services, logging capabilities, validation logic, and database utilities.   
+In addition to the main request path, supporting modules provide security services, logging capabilities, validation logic, and database utilities. 
+The Application generates security events that are stored in SQL Server.
+
+These events are later collected by the external Collector component, normalized into JSON telemetry, and forwarded to a SIEM platform (Wazuh).  
    
 ---
    
@@ -94,40 +97,59 @@ Stored information includes:
 - Session data
 - Security telemetry
 
-The database serves as both an operational data source and a telemetry source for future monitoring and SIEM-oriented analysis.   
+The database serves as the operational datastore for the application and as the telemetry source consumed by the external Collector component.
 
 ---
 
 
 ### 🧩 Supporting Components
 
-#### Security Utilities
+#### 🔐 Security Utilities
 
-Functions related to security or randomness are separated into dedicated modules.
+Dedicated modules responsible for security-related operations used throughout the application.
 
-Responsibilities:
+**Responsibilities:**
 
-- Password hashing
+- Password hashing (PBKDF2)
 - Salt generation
 - Random value generation
-- Simulated IP generation
+- Simulated IP address generation
 
-These components support authentication and telemetry generation throughout the system.
-   
+These utilities support authentication, transaction processing, and telemetry generation.
+
 ---
 
-#### DataBase Utilities
+#### 🛠️ Application Utilities
 
-Supports logging errors when errors occur during Repository Layer operation.
+Helper modules that provide common functionality used exclusively by the Application layer.
 
-Responsibilities:
+**Responsibilities:**
 
-- ODBC helper functions
-- Get Error from DataBase
+- Input validation
+- Repository error translation
+- String processing
+- Application log formatting
+- Simulated IP management
+
+These utilities simplify business logic implementation and improve code maintainability.
+
+---
+
+#### 🗄️ Shared Infrastructure
+
+Reusable infrastructure shared by both the **Application** and **Collector** components.
+
+**Responsibilities:**
+
+- Database connection management
+- ODBC helper utilities
+- File handling
 - Database error handling
+- System logging
+- Shared data structures
 
-It is an intermediary component that helps handle errors from the query execution layer and provides information for logging errors.
-   
+This module centralizes common infrastructure to avoid code duplication and provide a consistent interface for both components.
+
 ---
 
 #### Log Service
@@ -154,6 +176,8 @@ In addition to the main events used to support the log investigation, detecting 
 The system also includes a `System errors` log to record system and database errors during operation to aid in investigation, error correction, and troubleshooting.
 
 The generated records provide an audit trail of user and administrative actions.
+
+The generated telemetry is designed to be consumed by the Collector component, where events are normalized before being forwarded to a SIEM platform.
    
 ---
 
